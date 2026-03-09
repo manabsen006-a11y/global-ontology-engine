@@ -1,0 +1,215 @@
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL ONTOLOGY ENGINE — Design System
+   ═══════════════════════════════════════════════════════════ */
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  width: 100%; height: 100%;
+  font-family: 'Share Tech Mono', monospace;
+  background: #010C18;
+  color: #C0E4F5;
+  overflow: hidden;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #010C18; }
+::-webkit-scrollbar-thumb { background: #0C3A58; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #1A5A88; }
+
+/* ── Animations ────────────────────────────────────────── */
+@keyframes pulse {
+  0%, 100% { opacity: .25; transform: scale(1); }
+  50% { opacity: .7; transform: scale(1.18); }
+}
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+@keyframes fadeslide {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slideRight {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(0,200,255,.2); }
+  50% { box-shadow: 0 0 20px rgba(0,200,255,.5); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px) scale(0.8); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes borderPulse {
+  0%, 100% { border-color: rgba(0,200,255,.15); }
+  50% { border-color: rgba(0,200,255,.45); }
+}
+@keyframes heatPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+.pulse { animation: pulse 3s ease-in-out infinite; }
+.blink { animation: blink 1s step-end infinite; }
+.feed-new { animation: fadeslide 0.5s ease forwards; }
+.anim-fade { animation: fadeIn 0.4s ease forwards; }
+.anim-slide { animation: slideUp 0.5s ease forwards; }
+.anim-slide-right { animation: slideRight 0.5s ease forwards; }
+.anim-glow { animation: glow 3s ease infinite; }
+.anim-count { animation: countUp 0.6s ease forwards; }
+
+/* ── Interactive ───────────────────────────────────────── */
+button { cursor: pointer; transition: all .18s ease; }
+button:active { transform: scale(0.96); }
+textarea { resize: none; }
+textarea:focus, input:focus { outline: none; }
+
+/* ── Utility ───────────────────────────────────────────── */
+.glass {
+  background: rgba(2,15,30,.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid #0C3A58;
+}
+
+.card {
+  background: #020F1E;
+  border: 1px solid #0C3A58;
+  border-radius: 4px;
+  transition: border-color .3s, box-shadow .3s;
+}
+.card:hover {
+  border-color: rgba(0,200,255,.3);
+  box-shadow: 0 0 20px rgba(0,200,255,.05);
+}
+
+.stat-card {
+  background: linear-gradient(135deg, #020F1E 0%, #031525 100%);
+  border: 1px solid #0C3A58;
+  border-radius: 6px;
+  padding: 16px 20px;
+  text-align: center;
+  animation: slideUp 0.5s ease forwards;
+  transition: border-color .3s, transform .3s;
+}
+.stat-card:hover {
+  border-color: rgba(0,200,255,.35);
+  transform: translateY(-2px);
+}
+
+.tag {
+  display: inline-block;
+  font-size: 9px;
+  padding: 2px 8px;
+  border: 1px solid #0C3A58;
+  color: #4A8BAA;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+.section-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 2.5px;
+  color: #4A8BAA;
+  padding: 8px 14px;
+  border-bottom: 1px solid #0C3A58;
+  text-transform: uppercase;
+}
+
+/* ── Progress Bar ─────────────────────────────────────── */
+.progress-bar {
+  height: 4px;
+  background: #082A42;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s ease;
+}
+
+/* ── Table ─────────────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+.data-table th {
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #4A8BAA;
+  border-bottom: 1px solid #0C3A58;
+  font-family: 'Share Tech Mono', monospace;
+  font-weight: normal;
+}
+.data-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #082A42;
+  color: #C0E4F5;
+  font-family: 'Share Tech Mono', monospace;
+}
+.data-table tr {
+  transition: background .2s;
+}
+.data-table tr:hover {
+  background: rgba(0,200,255,.03);
+}
+
+/* ── Nav Tooltip ──────────────────────────────────────── */
+.nav-tooltip {
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 12px;
+  padding: 4px 10px;
+  background: #031525;
+  border: 1px solid #0C3A58;
+  border-radius: 3px;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #7BBAD5;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .2s;
+  z-index: 100;
+}
+.nav-item:hover .nav-tooltip {
+  opacity: 1;
+}
+
+/* ── Heatmap cell ─────────────────────────────────────── */
+.heat-cell {
+  border-radius: 3px;
+  transition: transform .2s, box-shadow .2s;
+  cursor: pointer;
+}
+.heat-cell:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(0,200,255,.3);
+  z-index: 2;
+}
