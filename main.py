@@ -119,7 +119,7 @@ app.include_router(dashboard_router)
 # Root health check
 # ─────────────────────────────────────────────────────────────────────────────
 
-@app.get("/", tags=["Health"], summary="Root health check")
+@app.get("/api/", tags=["Health"], summary="Root health check")
 def root():
     """
     Simple ping endpoint confirming the service is alive.
@@ -133,7 +133,7 @@ def root():
     }
 
 
-@app.get("/health", tags=["Health"], summary="Detailed health check")
+@app.get("/api/health", tags=["Health"], summary="Detailed health check")
 def health():
     """
     Detailed health check returning sub-system status.

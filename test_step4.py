@@ -24,7 +24,7 @@ client = TestClient(app)
 # ════════════════════════════════════════════════════════════════════════════
 
 def test_root_is_alive():
-    r = client.get("/")
+    r = client.get("/api/")
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "operational"
@@ -32,7 +32,7 @@ def test_root_is_alive():
 
 
 def test_health_endpoint():
-    r = client.get("/health")
+    r = client.get("/api/health")
     assert r.status_code == 200
     body = r.json()
     assert body["status"] == "healthy"
