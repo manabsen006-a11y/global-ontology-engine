@@ -3,9 +3,6 @@ import json
 import logging
 from typing import Dict, Any
 
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import PromptTemplate
-from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
@@ -17,55 +14,51 @@ class ComplaintExtraction(BaseModel):
     extracted_location: str = Field(description="The physical location extracted from the text.")
     summary: str = Field(description="A brief, professional 1-sentence summary of the issue.")
 
-# Setup output parser
-parser = JsonOutputParser(pydantic_object=ComplaintExtraction)
-
-# Definition of the core prompt
-triage_prompt = PromptTemplate(
-    template="""You are an expert AI triage assistant for a municipality's Public Service CRM.
-Your job is to analyze incoming raw text complaints from citizens and extract structured data.
-
-Process the following complaint text and return a JSON object with the requested fields.
-Do not include markdown blocks or any other text outside the JSON object.
-
-Complaint Text: 
-"{text}"
-
-{format_instructions}
-""",
-    input_variables=["text"],
-    partial_variables={"format_instructions": parser.get_format_instructions()},
-)
-
 # Initialize Gemini only if an API key is configured.
 _gemini_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
+client = None
 if _gemini_key:
     try:
-        llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash", temperature=0.1)
-        triage_chain = triage_prompt | llm | parser
+        from google import genai
+        client = genai.Client(api_key=_gemini_key)
     except Exception as e:
         logger.warning(f"Could not initialize Google GenAI model: {e}. Will use fallback.")
-        triage_chain = None
 else:
     logger.info("GOOGLE_API_KEY/GEMINI_API_KEY not set. AI triage will use local fallback logic.")
-    triage_chain = None
 
 def process_complaint_text(raw_text: str) -> Dict[str, Any]:
     """
-    Processes a raw complaint text using the LangChain Gemini pipeline
+    Processes a raw complaint text using the Gemini pipeline
     to extract category, severity, location, and summary.
     
     Includes robust error handling and fallback logic.
     """
     logger.info(f"Processing complaint via AI Triage: {raw_text[:50]}...")
     
-    if not triage_chain:
+    if not client:
         logger.warning("LLM Triage chain is unavailable. Using mock fallback logic.")
         return _apply_fallback_logic(raw_text)
     
     try:
-        # Invoke the LangChain pipeline
-        structured_output = triage_chain.invoke({"text": raw_text})
+        instruction = (
+            "You are an expert AI triage assistant for a municipality's Public Service CRM. "
+            "Your job is to analyze incoming raw text complaints from citizens and extract structured data. "
+            "Process the following complaint text and return a JSON object with the requested fields. "
+            "Do not include markdown blocks or any other text outside the JSON object."
+        )
+
+        response = client.models.generate_content(
+            model='gemini-1.5-flash',
+            contents=raw_text,
+            config={
+                'response_mime_type': 'application/json',
+                'response_schema': ComplaintExtraction,
+                'system_instruction': instruction,
+                'temperature': 0.1
+            },
+        )
+        
+        structured_output = json.loads(response.text)
         
         # Additional validation (e.g. ensuring severity is 1-10)
         severity = structured_output.get("severity_score", 5)

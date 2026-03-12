@@ -1,16 +1,12 @@
 fastapi
 uvicorn
 pydantic
-langchain
-langchain-google-genai
+google-genai
 neo4j
 httpx
-scikit-learn
-joblib
 websockets
 python-dotenv
 feedparser
 wbgapi
 beautifulsoup4
 lxml
-google-api-python-client
