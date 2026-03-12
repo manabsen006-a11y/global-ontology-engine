@@ -286,25 +286,13 @@ const EDGE_COLOR = (type) => ({
     supply: '#00E882', project: '#FFCC00', depend: '#FF8C00',
 }[type] || '#1A4A6A');
 
-const QUICK_QUERIES = [
-    "India's semiconductor strategy & geopolitical leverage",
-    "India-China conflict probability and deterrence",
-    "QUAD effectiveness vs China's BRI in Indo-Pacific",
-    "Path to India becoming AI superpower by 2030",
-    "Climate risks threatening India's growth trajectory",
-    "De-dollarization: BRICS impact on India's trade",
-    "India's nuclear doctrine vs Pakistan & China threats",
-    "Critical minerals strategy for India's tech future",
-];
+
 
 export default function OntologyEngine() {
     const svgRef = useRef(null);
     const [selectedNode, setSelectedNode] = useState(null);
     const [activeDomain, setActiveDomain] = useState('all');
     const [feeds, setFeeds] = useState([]);
-    const [query, setQuery] = useState('');
-    const [aiResponse, setAiResponse] = useState('');
-    const [isQuerying, setIsQuerying] = useState(false);
     const [stats, setStats] = useState({ updates: 0, threats: 7, intel: 247 });
     const pollingIndexRef = useRef(0);
 
@@ -492,51 +480,6 @@ export default function OntologyEngine() {
             .attr('stroke-width', d => selectedNode?.id === d.id ? 3.5 : (d.id === 'india' ? 2.8 : 1.8));
     }, [selectedNode]);
 
-    const handleQuery = useCallback(async () => {
-        if (!query.trim() || isQuerying) return;
-        setIsQuerying(true);
-        setAiResponse('');
-
-        await new Promise((resolve) => setTimeout(resolve, 900));
-
-        const scopeDomain = selectedNode?.domain || (activeDomain === 'all' ? null : activeDomain);
-        const scopedFeeds = scopeDomain ? feeds.filter((item) => item.domain === scopeDomain) : feeds;
-        const highRisk = scopedFeeds.filter((item) => item.sev === 'CRIT' || item.sev === 'HIGH').length;
-        const avgTrust = scopedFeeds.length
-            ? Math.round(scopedFeeds.reduce((sum, item) => sum + (item.trustScore || 0), 0) / scopedFeeds.length)
-            : 0;
-        const topSignals = sortFeeds(scopedFeeds)
-            .slice(0, 3)
-            .map((item, idx) => `${idx + 1}. [${item.sev}] ${item.text}`)
-            .join('\n');
-
-        const response = [
-            'ASSESSMENT',
-            `Scope: ${scopeDomain ? DOMAINS[scopeDomain]?.label : 'All Domains'}`,
-            `Signals analyzed: ${scopedFeeds.length}`,
-            `High-risk items: ${highRisk}`,
-            `Average provenance trust: ${avgTrust}/100`,
-            '',
-            'TOP SIGNALS',
-            topSignals || 'No matching live signals for this scope.',
-            '',
-            'ENTITY CONTEXT',
-            selectedNode
-                ? `${selectedNode.label}: ${selectedNode.intel}`
-                : 'No entity selected. Select a node to include graph context in the brief.',
-            '',
-            'QUERY',
-            query.trim(),
-            '',
-            'RECOMMENDATION',
-            highRisk > 0
-                ? 'Escalate CRIT/HIGH items to analyst review and run what-if impact simulation on connected entities.'
-                : 'Continue monitoring and refresh domain feeds before escalation.',
-        ].join('\n');
-
-        setAiResponse(response);
-        setIsQuerying(false);
-    }, [query, isQuerying, selectedNode, activeDomain, feeds]);
 
     const visibleFeeds = activeDomain === 'all' ? feeds : feeds.filter(f => f.domain === activeDomain);
 
@@ -743,95 +686,13 @@ export default function OntologyEngine() {
                                 </div>
                             </>
                         ) : (
-                            <div style={{ padding: '24px 14px', textAlign: 'center' }}>
+                            <div style={{ padding: '24px 14px', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                 <div style={{ fontSize: 32, opacity: 0.4, marginBottom: 10 }}>🕸️</div>
                                 <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.7 }}>
                                     Click any node to view<br />entity intelligence brief
                                 </div>
                             </div>
                         )}
-                    </div>
-
-                    {/* AI Query Panel */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
-                        <div style={{
-                            padding: '10px 14px', borderBottom: `2px solid ${C.primary}`,
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
-                            background: '#f8fafc',
-                        }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>Strategic Query</span>
-                        </div>
-                        <div style={{ padding: '10px 14px', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-                            <div style={{ fontSize: 11, color: C.textMuted, marginBottom: 6 }}>Quick Analysis</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                                {QUICK_QUERIES.map(q => (
-                                    <button key={q} onClick={() => setQuery(q)} style={{
-                                        fontSize: 11, padding: '5px 10px',
-                                        background: C.bg, border: `1px solid ${C.border}`,
-                                        color: C.text, borderRadius: 4,
-                                    }}>{q}</button>
-                                ))}
-                            </div>
-                        </div>
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px', minHeight: 0 }}>
-                            {isQuerying ? (
-                                <div style={{ textAlign: 'center', padding: '28px 0' }}>
-                                    <div style={{ fontSize: 18, marginBottom: 10, color: C.primary }}>Processing…</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.7 }}>
-                                        Analyzing {NODES.length} entities and {EDGES.length} relationships
-                                    </div>
-                                </div>
-                            ) : aiResponse ? (
-                                <div style={{ fontSize: 12, color: C.text, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
-                                    {aiResponse}
-                                </div>
-                            ) : (
-                                <div style={{ textAlign: 'center', padding: '28px 0' }}>
-                                    <div style={{ fontSize: 24, opacity: 0.4, marginBottom: 8 }}>◈</div>
-                                    <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.7 }}>
-                                        Select a query above or type your own.<br />
-                                        Click a node first for entity context.
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        <div style={{
-                            padding: '10px 14px', borderTop: `1px solid ${C.border}`,
-                            background: C.bg, flexShrink: 0,
-                        }}>
-                            <div style={{
-                                display: 'flex', gap: 8,
-                                border: `1px solid ${query.trim() ? C.primary : C.border}`,
-                                borderRadius: 4, background: C.panel,
-                            }}>
-                                <textarea
-                                    value={query}
-                                    onChange={e => setQuery(e.target.value)}
-                                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleQuery(); } }}
-                                    placeholder="Query the intelligence graph…"
-                                    style={{
-                                        flex: 1, padding: '10px 12px', background: 'transparent', border: 'none',
-                                        color: C.text, fontSize: 12,
-                                        minHeight: 50, maxHeight: 90, lineHeight: 1.5,
-                                    }}
-                                />
-                                <button
-                                    onClick={handleQuery}
-                                    disabled={isQuerying || !query.trim()}
-                                    style={{
-                                        padding: '8px 14px', margin: '6px',
-                                        background: isQuerying || !query.trim() ? C.bg : C.primary,
-                                        border: 'none',
-                                        color: isQuerying || !query.trim() ? C.textMuted : C.white,
-                                        borderRadius: 4, fontSize: 13, fontWeight: 600,
-                                        alignSelf: 'flex-end',
-                                    }}
-                                >{isQuerying ? '…' : 'Run'}</button>
-                            </div>
-                            <div style={{ fontSize: 11, color: C.textMuted, marginTop: 6 }}>
-                                Enter to query · Shift+Enter for newline
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

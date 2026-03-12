@@ -454,11 +454,8 @@ class CorrelationEngine:
         else:
             title = f"{template['name']}: {entity_name.title()}"
 
-        # Build Hypothesis
-        base_hypothesis = template["hypothesis_template"].format(entity=entity_name.title(), actors=actors_str, locations=locations_str)
-        if "{actors}" not in template["hypothesis_template"]:
-            base_hypothesis += f" Other actors involved: {actors_str}."
-        hypothesis = base_hypothesis
+        # Build Hypothesis (using the specific layout from entity_data.py templates)
+        hypothesis = template["hypothesis_template"].format(entity=entity_name.title(), actors=actors_str, locations=locations_str)
 
         domains_spanned = sorted({ec["domain"] for ec in evidence_chain if ec["domain"]})
         all_entities = set()
@@ -525,10 +522,10 @@ class CorrelationEngine:
             locations_str = ", ".join(l.title() for l in sorted(all_locations)) if all_locations else "None specified"
 
             hypothesis = (
-                f"Multi-domain intelligence activities ({', '.join(sorted(domains))}) observed involving {entity_name.title()}. "
-                f"Economic, geopolitical, or defense maneuvers associated with this entity indicate a coordinated strategic shift. "
-                f"Suspected actors responsible: {actors_str}. "
-                f"Regions involved: {locations_str}."
+                f"CONCLUSION: Multi-domain intelligence activities ({', '.join(sorted(domains))}) observed involving {entity_name.title()}. "
+                f"Economic, geopolitical, or defense maneuvers associated with this entity indicate a coordinated strategic shift.\n"
+                f"ACTORS: {actors_str}\n"
+                f"REGIONS: {locations_str}"
             )
 
             # Determine severity from events
@@ -545,7 +542,7 @@ class CorrelationEngine:
                 all_entities.update(s.all_entity_names())
 
             reports.append(IntelReport(
-                title=f"Multi-Domain Activity Detected: {entity_name.title()}",
+                title=f"Multi-Domain Activity Detected: Coordinated Strategic Maneuvers surrounding {entity_name.title()}",
                 hypothesis=hypothesis,
                 evidence_chain=evidence_chain,
                 trust_score=trust_score,

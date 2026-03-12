@@ -122,7 +122,7 @@ const ReportCard = ({ report }) => (
       padding: '10px 12px', fontSize: 12, color: '#92400e', lineHeight: 1.55, marginBottom: 12,
     }}>
       <strong style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: 0.5 }}>Hypothesis</strong>
-      <div style={{ marginTop: 4 }}>{report.hypothesis}</div>
+    <div style={{ marginTop: 4, whiteSpace: 'pre-wrap' }}>{report.hypothesis}</div>
     </div>
 
     {/* evidence chain */}
