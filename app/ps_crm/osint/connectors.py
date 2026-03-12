@@ -53,7 +53,7 @@ REDDIT_MIN_INTERVAL_SECONDS = max(0, int(os.environ.get("REDDIT_MIN_INTERVAL_SEC
 OPENSKY_MIN_INTERVAL_SECONDS = max(0, int(os.environ.get("OPENSKY_MIN_INTERVAL_SECONDS", "0")))
 AISSTREAM_MIN_INTERVAL_SECONDS = max(0, int(os.environ.get("AISSTREAM_MIN_INTERVAL_SECONDS", "0")))
 
-OSINT_CACHE_TTL_SECONDS = max(60, int(os.environ.get("OSINT_CACHE_TTL_SECONDS", "3600")))
+OSINT_CACHE_TTL_SECONDS = max(60, int(os.environ.get("OSINT_CACHE_TTL_SECONDS", "1200")))
 
 NEWSDATA_URL = os.environ.get("NEWSDATA_API_URL", "https://newsdata.io/api/1/latest").strip()
 OPENSKY_TOKEN_URL = os.environ.get("OPENSKY_TOKEN_URL", "https://opensky-network.org/api/oauth/token").strip()

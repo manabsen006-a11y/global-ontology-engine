@@ -524,22 +524,11 @@ class CorrelationEngine:
             actors_str = ", ".join(a.title() for a in sorted(all_actors)) if all_actors else "None specified"
             locations_str = ", ".join(l.title() for l in sorted(all_locations)) if all_locations else "None specified"
 
-            domain_summaries = []
-            for domain in sorted(domains):
-                domain_signals = [s for s in cluster if s.domain == domain]
-                if domain_signals:
-                    top_signal = domain_signals[0]
-                    domain_summaries.append(
-                        f"From {domain.upper()}: {top_signal.article_title}"
-                    )
-
             hypothesis = (
-                f"Multiple intelligence signals are converging around {entity_name.title()}, indicating a complex situation spanning {len(domains)} domains ({', '.join(sorted(domains))}).\n"
-                f"Interconnected activities include:\n" +
-                "\n".join(f"• {s}" for s in domain_summaries[:4]) +
-                f"\n\nContext:"
-                f"\n• Potential Actors Involved: {actors_str}"
-                f"\n• External Regions Impacted: {locations_str}"
+                f"Multi-domain intelligence activities ({', '.join(sorted(domains))}) observed involving {entity_name.title()}. "
+                f"Economic, geopolitical, or defense maneuvers associated with this entity indicate a coordinated strategic shift. "
+                f"Suspected actors responsible: {actors_str}. "
+                f"Regions involved: {locations_str}."
             )
 
             # Determine severity from events
