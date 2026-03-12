@@ -209,17 +209,6 @@ const EDGE_COLOR = (type) => ({
   supply:'#00E882', project:'#FFCC00', depend:'#FF8C00',
 }[type] || '#1A4A6A');
 
-const QUICK_QUERIES = [
-  "India's semiconductor strategy & geopolitical leverage",
-  "India-China conflict probability and deterrence",
-  "QUAD effectiveness vs China's BRI in Indo-Pacific",
-  "Path to India becoming AI superpower by 2030",
-  "Climate risks threatening India's growth trajectory",
-  "De-dollarization: BRICS impact on India's trade",
-  "India's nuclear doctrine vs Pakistan & China threats",
-  "Critical minerals strategy for India's tech future",
-];
-
 /* ════════════════════════════════════════════════════════════════
    COMPONENT
    ════════════════════════════════════════════════════════════════ */
@@ -228,9 +217,6 @@ export default function GlobalOntologyEngine() {
   const [selectedNode, setSelectedNode] = useState(null);
   const [activeDomain, setActiveDomain] = useState('all');
   const [feeds, setFeeds] = useState([]);
-  const [query, setQuery] = useState('');
-  const [aiResponse, setAiResponse] = useState('');
-  const [isQuerying, setIsQuerying] = useState(false);
   const [stats, setStats] = useState({ updates: 0, threats: 7, intel: 247 });
   const selectedRef = useRef(null);
 
@@ -401,58 +387,6 @@ export default function GlobalOntologyEngine() {
         return sel ? 3.5 : (d.id === 'india' ? 2.8 : 1.8);
       });
   }, [selectedNode]);
-
-  // AI Query
-  const handleQuery = useCallback(async () => {
-    if (!query.trim() || isQuerying) return;
-    setIsQuerying(true);
-    setAiResponse('');
-    const ctx = selectedNode
-      ? `Active entity focus: ${selectedNode.label} (${DOMAINS[selectedNode.domain]?.label}). Classified intel: ${selectedNode.intel}. Tags: ${selectedNode.tags?.join(', ')}. Power Index: ${selectedNode.power}. Risk Level: ${selectedNode.risk}.`
-      : `Full global ontology active: ${NODES.length} entities, ${EDGES.length} relationships spanning 6 strategic domains.`;
-    try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: `You are the Global Ontology Engine (GOE)—a classified AI strategic intelligence system operated for India's national security and global strategic analysis. You process interconnected geopolitical, economic, defense, technology, climate, and societal data from a live knowledge graph.
-
-Current context: ${ctx}
-
-Respond ONLY in this exact structured format—no preamble, no markdown headers:
-
-▸ ASSESSMENT
-[2-3 sentence strategic summary with precise factual grounding]
-
-▸ KEY VECTORS
-• [Factor 1 with specific data]
-• [Factor 2 with specific data]
-• [Factor 3 with specific data]
-• [Factor 4 if needed]
-
-▸ INDIA ANGLE
-[2-3 sentences on specific implications, opportunities, and risks for India]
-
-▸ THREAT LEVEL: [CRITICAL / HIGH / MEDIUM / LOW]
-[One-line justification]
-
-▸ STRATEGIC RECOMMENDATION
-[1-2 concrete, actionable steps with timeline]
-
-Be information-dense, precise, and intelligence-grade. No hedging language.`,
-          messages: [{ role: "user", content: query }]
-        })
-      });
-      const data = await res.json();
-      const text = data.content?.map(b => b.text || '').join('') || 'No intelligence available.';
-      setAiResponse(text);
-    } catch {
-      setAiResponse('⚠ GOE SYSTEM ERROR\nUnable to connect to intelligence network.\nVerify clearance level and retry.');
-    }
-    setIsQuerying(false);
-  }, [query, isQuerying, selectedNode]);
 
   const visibleFeeds = activeDomain === 'all' ? feeds : feeds.filter(f => f.domain === activeDomain);
 
@@ -721,116 +655,13 @@ Be information-dense, precise, and intelligence-grade. No hedging language.`,
                 </div>
               </>
             ) : (
-              <div style={{ padding:'18px 12px', textAlign:'center' }}>
+              <div style={{ padding:'18px 12px', textAlign:'center', height:'100%', display:'flex', flexDirection:'column', justifyContent:'center' }}>
                 <div style={{ fontSize:28, opacity:.3, marginBottom:8 }}>🕸️</div>
                 <div style={{ fontSize:9, color:C.text, letterSpacing:'1px', lineHeight:1.8 }}>
                   CLICK ANY NODE TO VIEW<br/>ENTITY INTELLIGENCE BRIEF
                 </div>
               </div>
             )}
-          </div>
-
-          {/* AI Strategic Query Panel */}
-          <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden', minHeight:0 }}>
-            <div style={{
-              padding:'7px 12px', borderBottom:`1px solid ${C.border}`,
-              display:'flex', alignItems:'center', justifyContent:'space-between', flexShrink:0,
-            }}>
-              <span style={{ fontSize:9, letterSpacing:'2px', color:C.text }}>AI STRATEGIC QUERY</span>
-              <div style={{ fontSize:8, color:C.purple, padding:'1px 7px',
-                border:`1px solid ${C.purple}55`, borderRadius:2, letterSpacing:'1px' }}>
-                CLAUDE-POWERED
-              </div>
-            </div>
-
-            {/* Quick query chips */}
-            <div style={{ padding:'8px 10px', borderBottom:`1px solid ${C.border}`, flexShrink:0 }}>
-              <div style={{ fontSize:8, color:C.text, letterSpacing:'1px', marginBottom:5 }}>QUICK ANALYSIS</div>
-              <div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>
-                {QUICK_QUERIES.map(q => (
-                  <button key={q} onClick={() => setQuery(q)} className="qbtn" style={{
-                    fontSize:8, padding:'3px 7px',
-                    background:'transparent', border:`1px solid ${C.border}`,
-                    color:C.text, borderRadius:2, fontFamily:"'Share Tech Mono',monospace",
-                  }}>{q}</button>
-                ))}
-              </div>
-            </div>
-
-            {/* AI Response */}
-            <div style={{ flex:1, overflowY:'auto', padding:'10px 12px', minHeight:0 }}>
-              {isQuerying ? (
-                <div style={{ textAlign:'center', padding:'24px 0' }}>
-                  <div style={{ fontSize:20, animation:'spin 1.5s linear infinite', marginBottom:10 }}>◈</div>
-                  <div style={{ fontSize:10, color:C.primary, marginBottom:6 }}>
-                    PROCESSING INTELLIGENCE QUERY<span className="blink">_</span>
-                  </div>
-                  <div style={{ fontSize:8.5, color:C.text, lineHeight:1.7 }}>
-                    Cross-referencing {NODES.length} ontology entities<br/>
-                    Analyzing {EDGES.length} strategic relationships<br/>
-                    Generating classified intelligence brief
-                  </div>
-                </div>
-              ) : aiResponse ? (
-                <div style={{ fontSize:9.5, color:C.textBright, lineHeight:1.8, whiteSpace:'pre-wrap' }}>
-                  {aiResponse}
-                </div>
-              ) : (
-                <div style={{ textAlign:'center', padding:'24px 0' }}>
-                  <div style={{ fontSize:22, opacity:.3, marginBottom:8 }}>◈</div>
-                  <div style={{ fontSize:10, color:C.textMid, marginBottom:6, letterSpacing:'1px' }}>
-                    GOE INTELLIGENCE READY
-                  </div>
-                  <div style={{ fontSize:8.5, color:C.text, lineHeight:1.8 }}>
-                    Select a query chip above or type<br/>
-                    your own strategic analysis request.<br/>
-                    Click a node first for entity context.
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Query Input */}
-            <div style={{
-              padding:'10px 12px', borderTop:`1px solid ${C.border}`,
-              background:'rgba(2,10,20,.95)', flexShrink:0,
-            }}>
-              <div style={{
-                display:'flex', gap:6,
-                border:`1px solid ${query.trim() ? C.primary+'66' : C.border}`,
-                borderRadius:3, background:'rgba(1,8,16,.9)',
-                transition:'border-color .2s',
-              }}>
-                <textarea
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  onKeyDown={e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleQuery();}}}
-                  placeholder="Query the intelligence graph..."
-                  style={{
-                    flex:1, padding:'8px 10px', background:'transparent', border:'none',
-                    color:C.textBright, fontSize:10,
-                    fontFamily:"'Share Tech Mono',monospace",
-                    minHeight:54, maxHeight:90, lineHeight:1.6,
-                  }}
-                />
-                <button
-                  onClick={handleQuery}
-                  disabled={isQuerying||!query.trim()}
-                  style={{
-                    padding:'8px 12px', margin:'4px',
-                    background: isQuerying||!query.trim() ? 'transparent' : C.primaryGlow,
-                    border:`1px solid ${isQuerying||!query.trim() ? C.border : C.primary}`,
-                    color: isQuerying||!query.trim() ? C.text : C.primary,
-                    borderRadius:2, fontSize:14, fontWeight:'bold',
-                    fontFamily:"'Share Tech Mono',monospace",
-                    alignSelf:'flex-end', cursor: isQuerying||!query.trim() ? 'default':'pointer',
-                  }}
-                >{isQuerying ? '◌' : '▶'}</button>
-              </div>
-              <div style={{ fontSize:8, color:C.text, marginTop:4, letterSpacing:'.5px' }}>
-                ↵ ENTER to query · SHIFT+ENTER for newline
-              </div>
-            </div>
           </div>
         </div>
       </div>
