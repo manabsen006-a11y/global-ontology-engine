@@ -97,24 +97,22 @@ export default function ContentDelivery() {
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
-            <div style={{ flexShrink: 0, padding: '10px 20px', background: 'linear-gradient(180deg,#021020,#010C18)', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ flexShrink: 0, padding: '14px 20px', background: C.primary, color: C.white, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 16, color: C.primary, letterSpacing: '2px' }}>
-                        📡 HYPER-LOCAL CONTENT DELIVERY
+                    <div style={{ fontWeight: 700, fontSize: 16 }}>
+                        Hyper-Local Content Delivery
                     </div>
-                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px' }}>
-                        PRECISION MESSAGING · SEGMENT-TARGETED · MULTI-CHANNEL
+                    <div style={{ fontSize: 12, opacity: 0.9 }}>
+                        Precision messaging · Segment-targeted · Multi-channel
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
                     {['campaigns', 'scheduler', 'analytics'].map(t => (
                         <button key={t} onClick={() => setTab(t)} style={{
-                            padding: '5px 14px', fontSize: 9, letterSpacing: '1.5px',
-                            background: tab === t ? C.primaryGlow : 'transparent',
-                            border: `1px solid ${tab === t ? C.primary : C.border}`,
-                            color: tab === t ? C.primary : C.text,
-                            borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                            textTransform: 'uppercase',
+                            padding: '6px 14px', fontSize: 12,
+                            background: tab === t ? 'rgba(255,255,255,0.2)' : 'transparent',
+                            border: `1px solid ${tab === t ? C.white : 'rgba(255,255,255,0.5)'}`,
+                            color: C.white, borderRadius: 4,
                         }}>{t}</button>
                     ))}
                 </div>
@@ -131,8 +129,8 @@ export default function ContentDelivery() {
                 ].map(s => (
                     <div key={s.l} className="stat-card" style={{ padding: '10px 12px' }}>
                         <div style={{ fontSize: 10, marginBottom: 4 }}>{s.icon}</div>
-                        <div style={{ fontSize: 20, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: s.c }}>{s.v}</div>
-                        <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px' }}>{s.l}</div>
+                        <div style={{ fontSize: 20, fontWeight: 700, color: s.c }}>{s.v}</div>
+                        <div style={{ fontSize: 8, color: C.text, }}>{s.l}</div>
                     </div>
                 ))}
             </div>
@@ -150,7 +148,7 @@ export default function ContentDelivery() {
                                     background: filterSegment === 'all' ? C.primaryGlow : 'transparent',
                                     border: `1px solid ${filterSegment === 'all' ? C.primary : C.borderSoft}`,
                                     color: filterSegment === 'all' ? C.primary : C.text,
-                                    borderRadius: 3, fontFamily: "'Share Tech Mono',monospace", marginBottom: 4,
+                                    borderRadius: 3, marginBottom: 4,
                                 }}>
                                     ALL SEGMENTS
                                 </button>
@@ -160,7 +158,7 @@ export default function ContentDelivery() {
                                         background: filterSegment === seg.id ? `rgba(${hexRgb(seg.color)},.12)` : 'transparent',
                                         border: `1px solid ${filterSegment === seg.id ? seg.color : C.borderSoft}`,
                                         color: filterSegment === seg.id ? seg.color : C.text,
-                                        borderRadius: 3, fontFamily: "'Share Tech Mono',monospace", marginBottom: 4,
+                                        borderRadius: 3, marginBottom: 4,
                                         display: 'flex', justifyContent: 'space-between',
                                     }}>
                                         <span>{seg.icon} {seg.label}</span>
@@ -187,7 +185,7 @@ export default function ContentDelivery() {
 
                         {/* Campaign Cards */}
                         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-                            <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 12 }}>
+                            <div style={{ fontSize: 9, color: C.text, marginBottom: 12 }}>
                                 {filtered.length} CONTENT CAMPAIGNS
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 12 }}>
@@ -202,7 +200,7 @@ export default function ContentDelivery() {
                                                 animation: 'slideUp 0.4s ease forwards',
                                             }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                                                <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 13, color: C.white }}>
+                                                <div style={{ fontWeight: 700, fontSize: 13, color: C.textBright }}>
                                                     {t.title}
                                                 </div>
                                                 <span className="tag" style={{ borderColor: seg?.color + '55', color: seg?.color }}>
@@ -231,8 +229,8 @@ export default function ContentDelivery() {
                                                     { l: 'CTR', v: `${t.ctr}%`, c: C.gold },
                                                 ].map(m => (
                                                     <div key={m.l} style={{ textAlign: 'center' }}>
-                                                        <div style={{ fontSize: 13, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: m.c }}>{m.v}</div>
-                                                        <div style={{ fontSize: 7, color: C.text, letterSpacing: '1px' }}>{m.l}</div>
+                                                        <div style={{ fontSize: 13, fontWeight: 700, color: m.c }}>{m.v}</div>
+                                                        <div style={{ fontSize: 7, color: C.text, }}>{m.l}</div>
                                                     </div>
                                                 ))}
                                             </div>
@@ -252,7 +250,7 @@ export default function ContentDelivery() {
 
                 {tab === 'scheduler' && (
                     <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-                        <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 16 }}>
+                        <div style={{ fontSize: 9, color: C.text, marginBottom: 16 }}>
                             📅 CAMPAIGN SCHEDULER
                         </div>
                         <div style={{ display: 'grid', gap: 10 }}>
@@ -267,14 +265,14 @@ export default function ContentDelivery() {
                                         <div style={{
                                             width: 50, textAlign: 'center', flexShrink: 0,
                                         }}>
-                                            <div style={{ fontSize: 14, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: C.white }}>
+                                            <div style={{ fontSize: 14, fontWeight: 700, color: C.textBright }}>
                                                 {c.date.split('-')[2]}
                                             </div>
                                             <div style={{ fontSize: 8, color: C.text }}>MAR</div>
                                             <div style={{ fontSize: 8, color: C.primary }}>{c.time}</div>
                                         </div>
                                         <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: 12, color: C.white, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, marginBottom: 4 }}>
+                                            <div style={{ fontSize: 12, color: C.textBright, fontWeight: 700, marginBottom: 4 }}>
                                                 {c.title}
                                             </div>
                                             <div style={{ display: 'flex', gap: 6 }}>
@@ -288,8 +286,7 @@ export default function ContentDelivery() {
                                             fontSize: 8, padding: '3px 10px', borderRadius: 10,
                                             background: c.status === 'sent' ? 'rgba(0,232,130,.12)' : c.status === 'scheduled' ? 'rgba(0,200,255,.12)' : 'rgba(255,204,0,.12)',
                                             color: c.status === 'sent' ? C.green : c.status === 'scheduled' ? C.primary : C.gold,
-                                            letterSpacing: '1px',
-                                        }}>{c.status.toUpperCase()}</span>
+                                            }}>{c.status.toUpperCase()}</span>
                                     </div>
                                 );
                             })}
@@ -299,7 +296,7 @@ export default function ContentDelivery() {
 
                 {tab === 'analytics' && (
                     <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-                        <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 16 }}>
+                        <div style={{ fontSize: 9, color: C.text, marginBottom: 16 }}>
                             📊 DELIVERY ANALYTICS BY SEGMENT
                         </div>
                         <div style={{ display: 'grid', gap: 12 }}>
@@ -318,14 +315,14 @@ export default function ContentDelivery() {
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
                                             }}>{seg.icon}</div>
                                             <div style={{ flex: 1 }}>
-                                                <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 14, color: C.white }}>
+                                                <div style={{ fontWeight: 700, fontSize: 14, color: C.textBright }}>
                                                     {seg.label}
                                                 </div>
                                                 <div style={{ fontSize: 8, color: C.text }}>{seg.size.toLocaleString()} voters in segment</div>
                                             </div>
                                             <div style={{ textAlign: 'right' }}>
                                                 <div style={{ fontSize: 8, color: C.text }}>Campaigns</div>
-                                                <div style={{ fontSize: 16, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: seg.color }}>{segTemplates.length}</div>
+                                                <div style={{ fontSize: 16, fontWeight: 700, color: seg.color }}>{segTemplates.length}</div>
                                             </div>
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
@@ -335,8 +332,8 @@ export default function ContentDelivery() {
                                                 { l: 'Read', v: read.toLocaleString(), c: C.purple },
                                             ].map(m => (
                                                 <div key={m.l} style={{ textAlign: 'center' }}>
-                                                    <div style={{ fontSize: 16, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: m.c }}>{m.v}</div>
-                                                    <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px' }}>{m.l}</div>
+                                                    <div style={{ fontSize: 16, fontWeight: 700, color: m.c }}>{m.v}</div>
+                                                    <div style={{ fontSize: 8, color: C.text, }}>{m.l}</div>
                                                 </div>
                                             ))}
                                         </div>

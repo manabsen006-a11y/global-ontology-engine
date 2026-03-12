@@ -68,28 +68,25 @@ export default function WorkerManagement() {
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
             <div style={{
-                flexShrink: 0, padding: '10px 20px',
-                background: 'linear-gradient(180deg,#021020,#010C18)',
-                borderBottom: `1px solid ${C.border}`,
+                flexShrink: 0, padding: '14px 20px',
+                background: C.primary, color: C.white,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
                 <div>
-                    <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 16, color: C.primary, letterSpacing: '2px' }}>
-                        👷 PARTY WORKER MANAGEMENT SYSTEM
+                    <div style={{ fontWeight: 700, fontSize: 16 }}>
+                        Worker Management
                     </div>
-                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px' }}>
-                        PROFILES · TASKS · PERFORMANCE · CAMPAIGNS
+                    <div style={{ fontSize: 12, opacity: 0.9 }}>
+                        Profiles · Tasks · Performance · Campaigns
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
                     {['workers', 'campaigns', 'leaderboard'].map(t => (
                         <button key={t} onClick={() => setTab(t)} style={{
-                            padding: '5px 14px', fontSize: 9, letterSpacing: '1.5px',
-                            background: tab === t ? C.primaryGlow : 'transparent',
-                            border: `1px solid ${tab === t ? C.primary : C.border}`,
-                            color: tab === t ? C.primary : C.text,
-                            borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                            textTransform: 'uppercase',
+                            padding: '6px 14px', fontSize: 12,
+                            background: tab === t ? 'rgba(255,255,255,0.2)' : 'transparent',
+                            border: `1px solid ${tab === t ? C.white : 'rgba(255,255,255,0.5)'}`,
+                            color: C.white, borderRadius: 4,
                         }}>{t}</button>
                     ))}
                 </div>
@@ -106,8 +103,8 @@ export default function WorkerManagement() {
                 ].map(s => (
                     <div key={s.l} className="stat-card" style={{ padding: '10px 12px' }}>
                         <div style={{ fontSize: 10, marginBottom: 4 }}>{s.icon}</div>
-                        <div style={{ fontSize: 20, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: s.c }}>{s.v}</div>
-                        <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px' }}>{s.l}</div>
+                        <div style={{ fontSize: 20, fontWeight: 700, color: s.c }}>{s.v}</div>
+                        <div style={{ fontSize: 8, color: C.text, }}>{s.l}</div>
                     </div>
                 ))}
             </div>
@@ -122,15 +119,13 @@ export default function WorkerManagement() {
                             <div style={{ flexShrink: 0, display: 'flex', gap: 8, padding: '10px 20px', borderBottom: `1px solid ${C.borderSoft}` }}>
                                 <select value={filterRole} onChange={e => setFilterRole(e.target.value)} style={{
                                     padding: '5px 10px', fontSize: 9, background: C.surface, border: `1px solid ${C.border}`,
-                                    color: C.textBright, borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                                }}>
+                                    color: C.white, borderRadius: 3, }}>
                                     <option value="all">ALL ROLES</option>
                                     {ROLES.map(r => <option key={r} value={r}>{r.toUpperCase()}</option>)}
                                 </select>
                                 <select value={filterArea} onChange={e => setFilterArea(e.target.value)} style={{
                                     padding: '5px 10px', fontSize: 9, background: C.surface, border: `1px solid ${C.border}`,
-                                    color: C.textBright, borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                                }}>
+                                    color: C.white, borderRadius: 3, }}>
                                     <option value="all">ALL AREAS</option>
                                     {AREAS.map(a => <option key={a} value={a}>{a.toUpperCase()}</option>)}
                                 </select>
@@ -150,7 +145,7 @@ export default function WorkerManagement() {
                                                 background: selectedWorker?.id === w.id ? 'rgba(0,200,255,.05)' : undefined,
                                             }}>
                                                 <td style={{ fontSize: 18, width: 30 }}>{w.avatar}</td>
-                                                <td style={{ color: C.white, fontWeight: 'bold' }}>{w.name}</td>
+                                                <td style={{ color: C.textBright, fontWeight: 'bold' }}>{w.name}</td>
                                                 <td><span className="tag" style={{ borderColor: C.purple + '66', color: C.purple }}>{w.role}</span></td>
                                                 <td>{w.area}</td>
                                                 <td>{w.tasksCompleted}/{w.tasksAssigned}</td>
@@ -193,7 +188,7 @@ export default function WorkerManagement() {
                                         background: 'rgba(0,200,255,.04)', borderBottom: `1px solid ${C.border}`,
                                     }}>
                                         <div style={{ fontSize: 40, marginBottom: 6 }}>{selectedWorker.avatar}</div>
-                                        <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 16, color: C.white }}>
+                                        <div style={{ fontWeight: 700, fontSize: 16, color: C.textBright }}>
                                             {selectedWorker.name}
                                         </div>
                                         <div className="tag" style={{ marginTop: 4, borderColor: C.purple + '66', color: C.purple }}>
@@ -213,7 +208,7 @@ export default function WorkerManagement() {
                                             </div>
                                         ))}
                                         <div style={{ marginTop: 14 }}>
-                                            <div style={{ fontSize: 9, color: C.text, letterSpacing: '1.5px', marginBottom: 8 }}>7-DAY ACTIVITY</div>
+                                            <div style={{ fontSize: 9, color: C.text, marginBottom: 8 }}>7-DAY ACTIVITY</div>
                                             <div style={{ display: 'flex', gap: 4 }}>
                                                 {selectedWorker.dailyLog.map(d => (
                                                     <div key={d.day} style={{ flex: 1, textAlign: 'center' }}>
@@ -237,20 +232,18 @@ export default function WorkerManagement() {
                                             <button style={{
                                                 flex: 1, padding: '8px', fontSize: 9,
                                                 background: C.primaryGlow, border: `1px solid ${C.primary}`,
-                                                color: C.primary, borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                                            }}>📱 CONTACT</button>
+                                                color: C.primary, borderRadius: 3, }}>📱 CONTACT</button>
                                             <button style={{
                                                 flex: 1, padding: '8px', fontSize: 9,
                                                 background: 'transparent', border: `1px solid ${C.border}`,
-                                                color: C.text, borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                                            }}>📋 ASSIGN</button>
+                                                color: C.text, borderRadius: 3, }}>📋 ASSIGN</button>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
                                 <div style={{ padding: 30, textAlign: 'center' }}>
                                     <div style={{ fontSize: 40, opacity: .3, marginBottom: 12 }}>👷</div>
-                                    <div style={{ fontSize: 10, color: C.text, letterSpacing: '1px', lineHeight: 1.8 }}>
+                                    <div style={{ fontSize: 10, color: C.text, lineHeight: 1.8 }}>
                                         SELECT A WORKER<br />TO VIEW PROFILE AND<br />ACTIVITY DETAILS
                                     </div>
                                 </div>
@@ -261,22 +254,21 @@ export default function WorkerManagement() {
 
                 {tab === 'campaigns' && (
                     <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-                        <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 16 }}>
+                        <div style={{ fontSize: 9, color: C.text, marginBottom: 16 }}>
                             CAMPAIGN TRACKER — {CAMPAIGNS.length} CAMPAIGNS
                         </div>
                         <div style={{ display: 'grid', gap: 12 }}>
                             {CAMPAIGNS.map(c => (
                                 <div key={c.name} className="card" style={{ padding: 16 }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                                        <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 14, color: C.white }}>
+                                        <div style={{ fontWeight: 700, fontSize: 14, color: C.textBright }}>
                                             {c.name}
                                         </div>
                                         <span style={{
                                             fontSize: 8, padding: '3px 10px', borderRadius: 10,
                                             background: c.status === 'active' ? 'rgba(0,232,130,.12)' : c.status === 'completed' ? 'rgba(0,200,255,.12)' : 'rgba(255,204,0,.12)',
                                             color: c.status === 'active' ? C.green : c.status === 'completed' ? C.primary : C.gold,
-                                            letterSpacing: '1px',
-                                        }}>{c.status.toUpperCase()}</span>
+                                            }}>{c.status.toUpperCase()}</span>
                                     </div>
                                     <div className="progress-bar" style={{ height: 6, marginBottom: 10 }}>
                                         <div className="progress-fill" style={{
@@ -297,7 +289,7 @@ export default function WorkerManagement() {
 
                 {tab === 'leaderboard' && (
                     <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-                        <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 16 }}>
+                        <div style={{ fontSize: 9, color: C.text, marginBottom: 16 }}>
                             🏆 PERFORMANCE LEADERBOARD
                         </div>
                         <div style={{ display: 'grid', gap: 6 }}>
@@ -311,16 +303,16 @@ export default function WorkerManagement() {
                                         width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         fontSize: i < 3 ? 16 : 11,
                                         color: i < 3 ? [C.gold, '#C0C0C0', '#CD7F32'][i] : C.text,
-                                        fontFamily: "'Rajdhani',sans-serif", fontWeight: 700,
+                                        fontWeight: 700,
                                     }}>{i < 3 ? ['🥇', '🥈', '🥉'][i] : `#${i + 1}`}</div>
                                     <div style={{ fontSize: 18 }}>{w.avatar}</div>
                                     <div style={{ flex: 1 }}>
-                                        <div style={{ fontSize: 11, color: C.white }}>{w.name}</div>
+                                        <div style={{ fontSize: 11, color: C.textBright }}>{w.name}</div>
                                         <div style={{ fontSize: 8, color: C.text }}>{w.role} · {w.area}</div>
                                     </div>
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{
-                                            fontSize: 16, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700,
+                                            fontSize: 16, fontWeight: 700,
                                             color: w.performance > 70 ? C.green : w.performance > 40 ? C.gold : C.red
                                         }}>
                                             {w.performance}%

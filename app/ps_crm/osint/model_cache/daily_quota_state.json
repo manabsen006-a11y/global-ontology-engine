@@ -1,0 +1,44 @@
+{
+  "date": "2026-03-12",
+  "providers": {
+    "quota_smoke_test": 2,
+    "even_spacing_smoke": {
+      "used": 1,
+      "last_call_ts": 1773311914.9510455
+    },
+    "reddit": {
+      "used": 5,
+      "last_call_ts": 1773324807.2368438,
+      "burst_start_ts": 1773324807.2368438,
+      "burst_count": 1
+    },
+    "gnews": {
+      "used": 80,
+      "last_call_ts": 1773317463.8698316
+    },
+    "newsdata": {
+      "used": 80,
+      "last_call_ts": 1773325299.3960965,
+      "burst_start_ts": 1773325299.3960965,
+      "burst_count": 1
+    },
+    "opensky": {
+      "used": 5,
+      "last_call_ts": 1773324810.8415132,
+      "burst_start_ts": 1773324810.8415132,
+      "burst_count": 1
+    },
+    "aisstream": {
+      "used": 5,
+      "last_call_ts": 1773324811.895391,
+      "burst_start_ts": 1773324811.895391,
+      "burst_count": 1
+    },
+    "youtube": {
+      "used": 1,
+      "last_call_ts": 1773324844.196395,
+      "burst_start_ts": 1773324844.196395,
+      "burst_count": 1
+    }
+  }
+}

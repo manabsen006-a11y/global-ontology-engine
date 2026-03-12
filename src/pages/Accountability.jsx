@@ -87,25 +87,25 @@ export default function Accountability() {
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
-            <div style={{ flexShrink: 0, padding: '10px 20px', background: 'linear-gradient(180deg,#021020,#010C18)', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ flexShrink: 0, padding: '14px 20px', background: C.primary, color: C.white, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 16, color: C.primary, letterSpacing: '2px' }}>
-                        📷 MICRO-ACCOUNTABILITY MAPPING
+                    <div style={{ fontWeight: 700, fontSize: 16 }}>
+                        Micro-Accountability Mapping
                     </div>
-                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px' }}>
-                        STREET-LEVEL INFRASTRUCTURE · BEFORE/AFTER PROOF · CITIZEN NOTIFICATIONS
+                    <div style={{ fontSize: 12, opacity: 0.9 }}>
+                        Street-level infrastructure · Before/after proof · Citizen notifications
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: 18, alignItems: 'center' }}>
                     {[
-                        { l: 'PROJECTS', v: PROJECTS.length, c: C.primary },
-                        { l: 'COMPLETED', v: completedCount, c: C.green },
-                        { l: 'IN PROGRESS', v: inProgressCount, c: C.primary },
-                        { l: 'NOTIFIED', v: notifiedResidents.toLocaleString(), c: C.purple },
+                        { l: 'Projects', v: PROJECTS.length },
+                        { l: 'Completed', v: completedCount },
+                        { l: 'In Progress', v: inProgressCount },
+                        { l: 'Notified', v: notifiedResidents.toLocaleString() },
                     ].map(s => (
                         <div key={s.l} style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: 16, fontWeight: 'bold', color: s.c, lineHeight: 1, fontFamily: "'Rajdhani',sans-serif" }}>{s.v}</div>
-                            <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px' }}>{s.l}</div>
+                            <div style={{ fontSize: 16, fontWeight: 700 }}>{s.v}</div>
+                            <div style={{ fontSize: 10, opacity: 0.85 }}>{s.l}</div>
                         </div>
                     ))}
                 </div>
@@ -117,43 +117,38 @@ export default function Accountability() {
                 <div style={{ width: 250, flexShrink: 0, background: C.panel, borderRight: `1px solid ${C.border}`, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
                     <div className="section-title">FILTERS</div>
                     <div style={{ padding: 12 }}>
-                        <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px', marginBottom: 6 }}>CATEGORY</div>
+                        <div style={{ fontSize: 8, color: C.text, marginBottom: 6 }}>CATEGORY</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
                             <button onClick={() => setFilterCat('all')} style={{
                                 fontSize: 8, padding: '4px 8px', background: filterCat === 'all' ? C.primaryGlow : 'transparent',
                                 border: `1px solid ${filterCat === 'all' ? C.primary : C.border}`,
-                                color: filterCat === 'all' ? C.primary : C.text, borderRadius: 2, fontFamily: "'Share Tech Mono',monospace",
-                            }}>ALL</button>
+                                color: filterCat === 'all' ? C.primary : C.text, borderRadius: 2, }}>ALL</button>
                             {CATEGORIES.map(cat => (
                                 <button key={cat.id} onClick={() => setFilterCat(cat.id)} style={{
                                     fontSize: 8, padding: '4px 8px',
                                     background: filterCat === cat.id ? `rgba(${hexRgb(cat.color)},.15)` : 'transparent',
                                     border: `1px solid ${filterCat === cat.id ? cat.color : C.border}`,
-                                    color: filterCat === cat.id ? cat.color : C.text, borderRadius: 2, fontFamily: "'Share Tech Mono',monospace",
-                                }}>{cat.icon} {cat.label}</button>
+                                    color: filterCat === cat.id ? cat.color : C.text, borderRadius: 2, }}>{cat.icon} {cat.label}</button>
                             ))}
                         </div>
-                        <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px', marginBottom: 6 }}>STATUS</div>
+                        <div style={{ fontSize: 8, color: C.text, marginBottom: 6 }}>STATUS</div>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 12 }}>
                             <button onClick={() => setFilterStatus('all')} style={{
                                 fontSize: 8, padding: '4px 8px', background: filterStatus === 'all' ? C.primaryGlow : 'transparent',
                                 border: `1px solid ${filterStatus === 'all' ? C.primary : C.border}`,
-                                color: filterStatus === 'all' ? C.primary : C.text, borderRadius: 2, fontFamily: "'Share Tech Mono',monospace",
-                            }}>ALL</button>
+                                color: filterStatus === 'all' ? C.primary : C.text, borderRadius: 2, }}>ALL</button>
                             {Object.entries(STATUS_MAP).map(([k, v]) => (
                                 <button key={k} onClick={() => setFilterStatus(k)} style={{
                                     fontSize: 8, padding: '4px 8px',
                                     background: filterStatus === k ? `rgba(${hexRgb(v.color)},.15)` : 'transparent',
                                     border: `1px solid ${filterStatus === k ? v.color : C.border}`,
-                                    color: filterStatus === k ? v.color : C.text, borderRadius: 2, fontFamily: "'Share Tech Mono',monospace",
-                                }}>{v.label}</button>
+                                    color: filterStatus === k ? v.color : C.text, borderRadius: 2, }}>{v.label}</button>
                             ))}
                         </div>
-                        <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px', marginBottom: 6 }}>WARD</div>
+                        <div style={{ fontSize: 8, color: C.text, marginBottom: 6 }}>WARD</div>
                         <select value={filterWard} onChange={e => setFilterWard(e.target.value)} style={{
                             width: '100%', padding: '5px 10px', fontSize: 9, background: C.surface, border: `1px solid ${C.border}`,
-                            color: C.textBright, borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                        }}>
+                            color: C.white, borderRadius: 3, }}>
                             <option value="all">ALL WARDS</option>
                             {WARDS_LIST.map(w => <option key={w} value={w}>{w}</option>)}
                         </select>
@@ -180,7 +175,7 @@ export default function Accountability() {
 
                 {/* Center: Project List */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 12 }}>
+                    <div style={{ fontSize: 9, color: C.text, marginBottom: 12 }}>
                         {filtered.length} PROJECTS · CLICK FOR DETAILS
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 10 }}>
@@ -194,7 +189,7 @@ export default function Accountability() {
                                         animation: 'slideUp 0.4s ease forwards',
                                     }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                                        <span style={{ fontSize: 11, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: C.white }}>
+                                        <span style={{ fontSize: 11, fontWeight: 700, color: C.textBright }}>
                                             {p.title}
                                         </span>
                                     </div>
@@ -233,17 +228,17 @@ export default function Accountability() {
                                 borderBottom: `1px solid ${C.border}`,
                             }}>
                                 <div style={{ fontSize: 24, marginBottom: 6 }}>{selectedProject.categoryObj.icon}</div>
-                                <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 15, color: C.white }}>
+                                <div style={{ fontWeight: 700, fontSize: 15, color: C.textBright }}>
                                     {selectedProject.categoryObj.label} Improvement
                                 </div>
-                                <div style={{ fontSize: 9, color: selectedProject.categoryObj.color, letterSpacing: '1px' }}>
+                                <div style={{ fontSize: 9, color: selectedProject.categoryObj.color, }}>
                                     {selectedProject.street} · {selectedProject.ward}
                                 </div>
                             </div>
 
                             {/* Before / After Comparison */}
                             <div style={{ padding: 14 }}>
-                                <div style={{ fontSize: 9, color: C.text, letterSpacing: '1.5px', marginBottom: 10 }}>BEFORE / AFTER COMPARISON</div>
+                                <div style={{ fontSize: 9, color: C.text, marginBottom: 10 }}>BEFORE / AFTER COMPARISON</div>
                                 <div style={{ position: 'relative', height: 160, borderRadius: 4, overflow: 'hidden', border: `1px solid ${C.border}`, marginBottom: 12 }}>
                                     {/* Before side */}
                                     <div style={{
@@ -287,7 +282,7 @@ export default function Accountability() {
                                 />
 
                                 {/* Timeline */}
-                                <div style={{ fontSize: 9, color: C.text, letterSpacing: '1.5px', marginBottom: 10 }}>PROJECT TIMELINE</div>
+                                <div style={{ fontSize: 9, color: C.text, marginBottom: 10 }}>PROJECT TIMELINE</div>
                                 <div style={{ borderLeft: `2px solid ${C.border}`, paddingLeft: 14, marginLeft: 6 }}>
                                     {[
                                         { label: 'Project Initiated', date: selectedProject.startDate, done: true },
@@ -314,7 +309,7 @@ export default function Accountability() {
                                         padding: 12, background: 'rgba(176,107,255,.06)', border: `1px solid ${C.purple}33`,
                                         borderRadius: 4, marginTop: 10,
                                     }}>
-                                        <div style={{ fontSize: 9, color: C.purple, letterSpacing: '1px', marginBottom: 6 }}>📣 NOTIFICATION SENT</div>
+                                        <div style={{ fontSize: 9, color: C.purple, marginBottom: 6 }}>📣 NOTIFICATION SENT</div>
                                         <div style={{ fontSize: 9, color: C.textBright, lineHeight: 1.6 }}>
                                             "New {selectedProject.categoryObj.label.toLowerCase()} improvement on {selectedProject.street}! Your area has been upgraded.
                                             Verified by ward inspector. View before/after proof in the app."
@@ -329,7 +324,7 @@ export default function Accountability() {
                     ) : (
                         <div style={{ padding: 30, textAlign: 'center' }}>
                             <div style={{ fontSize: 40, opacity: .3, marginBottom: 12 }}>📷</div>
-                            <div style={{ fontSize: 10, color: C.text, letterSpacing: '1px', lineHeight: 1.8 }}>
+                            <div style={{ fontSize: 10, color: C.text, lineHeight: 1.8 }}>
                                 SELECT A PROJECT TO VIEW<br />BEFORE/AFTER COMPARISON<br />AND NOTIFICATION STATUS
                             </div>
                         </div>

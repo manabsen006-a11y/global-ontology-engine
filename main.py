@@ -18,14 +18,22 @@ Then visit:
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+# Load local environment variables before importing modules that read env vars.
+load_dotenv()
 
 from app.api.hitl_routes import router as hitl_router, seed_mock_edges
 from app.api.dashboard_routes import router as dashboard_router
+from app.ps_crm.api import router as ps_crm_router
+from app.ps_crm.osint.api import router as osint_router
+from app.ps_crm.osint.api import news_proxy_router
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Logging configuration
@@ -103,7 +111,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],       # Restrict in production: ["https://nexus.yourdomain.com"]
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -113,6 +121,9 @@ app.add_middleware(
 # ─────────────────────────────────────────────────────────────────────────────
 app.include_router(hitl_router)
 app.include_router(dashboard_router)
+app.include_router(ps_crm_router)
+app.include_router(osint_router)
+app.include_router(news_proxy_router)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -141,13 +152,20 @@ def health():
     """
     from app.api.hitl_routes import _edge_store
     from app.api.dashboard_routes import get_registry
+    from app.ps_crm.osint.quota import get_quota_usage
 
     reg = get_registry()
+    has_gnews_key = bool(os.environ.get("GNEWS_API_KEY", "").strip())
+    gnews_limit = max(0, int(os.environ.get("GNEWS_DAILY_LIMIT", "80")))
+    gnews_quota = get_quota_usage("gnews", gnews_limit)
     return {
         "status":              "healthy",
         "edge_store_count":    _edge_store.count(),
         "ontology_version":    reg.current_version,
         "entity_types":        len(reg.entity_types),
         "relationship_types":  len(reg.relationship_types),
+        "newsApi":             True,  # Frontend expects this flag to enable live mode.
+        "news_provider":       "gnews" if has_gnews_key else "osint-fallback",
+        "gnews_quota":         gnews_quota,
         "neo4j":               "mock (not connected)",  # Replace with live ping
     }

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as d3 from "d3";
+import { searchNews } from "../services/newsApi";
 import { C, hexRgb, DOMAINS, SEV } from "../theme";
 
 /* ════════════════════════════════════════════════════════════════
@@ -172,50 +173,108 @@ const EDGES = [
     { s: 'quantum', t: 'cyber', type: 'threat', w: 0.7, label: 'Q-Day Cryptobreak' },
 ];
 
-// ── Live Feed Data ───────────────────────────────────────────────
-const FEEDS = {
-    geopolitics: [
-        { sev: 'HIGH', text: 'India-China LAC: partial disengagement completed at Depsang; patrolling rights partially restored after 4-year standoff' },
-        { sev: 'HIGH', text: 'QUAD foreign ministers convene emergency virtual session on PLAN activity around Senkaku Islands and contested atolls' },
-        { sev: 'CRIT', text: 'Pakistan Shaheen-3 MRBM test: range 2,750km—full Indian subcontinent coverage; launched from undisclosed site' },
-        { sev: 'MED', text: 'India Chabahar port: US waiver extended 18 months enabling unimpeded Iranian port access for Central Asia connectivity' },
-        { sev: 'MED', text: 'BRICS+ finance ministers meeting: alternative SWIFT mechanism for bilateral trade pilot—India, China, Russia trilateral channel' },
-    ],
-    economics: [
-        { sev: 'MED', text: 'India nominal GDP reaches $3.73T—overtakes UK to become world\'s 4th largest economy ahead of 2027 forecast' },
-        { sev: 'HIGH', text: 'China cuts rare earth export quotas 18%—chip supply chain red alert; TSMC announces 6-month buffer stock emergency build' },
-        { sev: 'LOW', text: 'IMF raises India FY2026 growth forecast to 7.2%—fastest major economy for 3rd consecutive year' },
-        { sev: 'MED', text: 'Rupee settlement mechanism live in 22 nations; SWIFT bypassed in 6 corridors; ₹ trade share hits 4.7% of India external trade' },
-        { sev: 'HIGH', text: 'India PLI scheme: ₹2.1L Cr investment committed across 14 sectors; 8.5 lakh manufacturing jobs created in 36 months' },
-    ],
-    defense: [
-        { sev: 'CRIT', text: 'DRDO Hypersonic Technology Demonstrator Vehicle (HSTDV-2): Mach 6.5 achieved in 32-sec scramjet burn—India joins hypersonic club' },
-        { sev: 'HIGH', text: 'INS Arighat completes first credible nuclear deterrence patrol: K-4 SLBM (3,500km range) carried; second-strike capability confirmed' },
-        { sev: 'CRIT', text: 'Cyber: Indian power grid attack attributed to APT41 (China state); CERT-In declares Tier-1 incident; 3 states affected for 4 hours' },
-        { sev: 'MED', text: 'INDUS-X milestone: 11 India-US co-development projects approved including AI targeting pod, counter-drone system, GaN radar' },
-        { sev: 'HIGH', text: 'BrahMos-NG flight trial success: 450km range, Mach 3.5; Philippines deploys 3rd regiment; 14 nations in procurement pipeline' },
-    ],
-    technology: [
-        { sev: 'MED', text: 'IndiaAI Mission: ₹2,000Cr compute cluster tender awarded—10,000 H100-equivalent GPUs by Q3 2025; 3 sites in Pune, Hyderabad, Chennai' },
-        { sev: 'HIGH', text: 'India AI startup funding Q1 2026: $4.2B—world #3 behind USA and China; 47 unicorns in AI-adjacent sectors' },
-        { sev: 'MED', text: 'ISRO Gaganyaan: Crew Module Integration Review cleared; Vyom Mitra humanoid robot final calibration; launch window Q4 2025' },
-        { sev: 'LOW', text: 'India Quantum: Delhi-Agra QKD fiber link operational (400km); DRDO classifies for strategic communications by 2026' },
-        { sev: 'MED', text: 'Tata Electronics: iPhone manufacturing capacity reaches 30% of Apple India target; $2.5B expansion announced for Tamil Nadu facility' },
-    ],
-    climate: [
-        { sev: 'HIGH', text: 'India solar capacity: 94 GW cumulative—world #3; 2030 target 500 GW on track; manufacturing PLI drives domestic cell production' },
-        { sev: 'CRIT', text: 'GLOF risk: 189 high-risk glacial lake outburst sites mapped in Himalayan region; Sikkim GLOF 2024 caused $1B damage—early warning gaps' },
-        { sev: 'HIGH', text: 'Western Ghats: 3rd consecutive extreme monsoon season—148% of normal rainfall; landslides displace 400K in Maharashtra, Goa, Kerala' },
-        { sev: 'MED', text: 'India Green Hydrogen Mission Phase II: $500M disbursed; 12 electrolyzer manufacturers announced capacity of 5 GW/year by 2027' },
-        { sev: 'LOW', text: 'India-UAE climate finance pact: $75B green infrastructure pipeline by 2030; solar, green hydrogen, water tech corridors defined' },
-    ],
-    society: [
-        { sev: 'LOW', text: 'UPI January 2026: 15.6B transactions, ₹21.3L Cr value—47% of global real-time payment volume; DPI model adopted by 12 nations' },
-        { sev: 'MED', text: 'India GII 2025 rank: 39 (all-time high); patents filed up 31% YoY; startup ecosystem: 1.4L+ registered, 120 unicorns' },
-        { sev: 'LOW', text: 'e-Rupee CBDC cross-border pilot: India-UAE-Singapore corridor live; 3 lakh transactions processed; retail+wholesale pilots ongoing' },
-        { sev: 'MED', text: 'India diaspora remittances: $125.7B in 2024—world\'s largest recipient for 6th consecutive year; Gulf + USA major corridors' },
-        { sev: 'MED', text: 'India Demographic Dividend: 600M under 25; Skill India Mission targets 30M/year; AI literacy mandated in NEP 3.0 K-12 curriculum' },
-    ],
+// ── Live Feed Configuration ───────────────────────────────────────────────
+const DOMAIN_QUERIES = {
+    geopolitics: 'geopolitics OR diplomacy OR foreign policy OR border security OR treaty',
+    economics: 'economy OR trade OR inflation OR gdp OR sanctions OR manufacturing',
+    defense: 'defense OR military OR armed forces OR naval exercise OR missile OR cyber warfare',
+    technology: 'ai OR semiconductor OR quantum OR space technology OR cyber security startup',
+    climate: 'climate change OR extreme weather OR renewable energy OR emissions OR adaptation',
+    society: 'public health OR education policy OR migration OR jobs OR social welfare',
+};
+
+const DOMAIN_KEYWORDS = {
+    geopolitics: ['diplomacy', 'border', 'embassy', 'treaty', 'foreign policy', 'summit', 'minister'],
+    economics: ['economy', 'trade', 'gdp', 'inflation', 'market', 'fiscal', 'rupee', 'export', 'import'],
+    defense: ['defense', 'military', 'army', 'navy', 'air force', 'missile', 'drone', 'war', 'cyberattack'],
+    technology: ['ai', 'artificial intelligence', 'llm', 'chip', 'semiconductor', 'quantum', 'startup', 'software'],
+    climate: ['climate', 'emissions', 'renewable', 'solar', 'heatwave', 'flood', 'drought', 'weather'],
+    society: ['education', 'health', 'hospital', 'jobs', 'welfare', 'migration', 'demography', 'culture'],
+};
+
+const SEVERITY_KEYWORDS = {
+    CRIT: ['war', 'invasion', 'terror', 'critical', 'missile strike', 'cyberattack', 'outbreak'],
+    HIGH: ['attack', 'sanction', 'conflict', 'crisis', 'risk', 'threat', 'alert'],
+    MED: ['talks', 'deal', 'policy', 'update', 'review', 'summit', 'exercise'],
+};
+
+const SOURCE_TRUST_BASE = {
+    reuters: 92,
+    bloomberg: 90,
+    associatedpress: 88,
+    bbc: 87,
+    theguardian: 84,
+    gnews: 78,
+    reddit: 58,
+};
+
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+const scoreDomain = (text, domain) => {
+    const keywords = DOMAIN_KEYWORDS[domain] || [];
+    return keywords.reduce((score, keyword) => score + (text.includes(keyword) ? 1 : 0), 0);
+};
+
+const classifyDomain = (article) => {
+    const text = `${article?.title || ''} ${article?.description || ''} ${article?.content || ''}`.toLowerCase();
+    let bestDomain = 'unknown';
+    let bestScore = 0;
+
+    Object.keys(DOMAIN_KEYWORDS).forEach((domain) => {
+        const score = scoreDomain(text, domain);
+        if (score > bestScore) {
+            bestScore = score;
+            bestDomain = domain;
+        }
+    });
+
+    return { domain: bestDomain, confidence: bestScore, text };
+};
+
+const inferSeverity = (text) => {
+    if (SEVERITY_KEYWORDS.CRIT.some((term) => text.includes(term))) return 'CRIT';
+    if (SEVERITY_KEYWORDS.HIGH.some((term) => text.includes(term))) return 'HIGH';
+    if (SEVERITY_KEYWORDS.MED.some((term) => text.includes(term))) return 'MED';
+    return 'LOW';
+};
+
+const dedupeFeeds = (items) => {
+    const seen = new Set();
+    return items.filter((item) => {
+        const key = (item.url || item.text || '').toLowerCase().trim();
+        if (!key || seen.has(key)) return false;
+        seen.add(key);
+        return true;
+    });
+};
+
+const sortFeeds = (items) => [...items].sort((a, b) => new Date(b.time) - new Date(a.time));
+
+const inferTrustScore = (sourceName, confidence) => {
+    const normalized = (sourceName || '').toLowerCase().replace(/\s+/g, '');
+    const base = SOURCE_TRUST_BASE[normalized] || 72;
+    return clamp(base + confidence * 3, 45, 98);
+};
+
+const mapArticleToFeed = (article, requestedDomain) => {
+    const { domain: predictedDomain, confidence, text } = classifyDomain(article);
+    const requestedDomainScore = scoreDomain(text, requestedDomain);
+    const isRelevantToRequested = requestedDomainScore > 0 || predictedDomain === requestedDomain;
+    const finalDomain = predictedDomain === 'unknown' ? requestedDomain : predictedDomain;
+    const source = article.source?.name || 'Unknown';
+
+    return {
+        sev: inferSeverity(text),
+        text: article.title,
+        domain: finalDomain,
+        requestedDomain,
+        confidence,
+        isRelevantToRequested,
+        time: new Date(article.publishedAt || Date.now()),
+        source,
+        trustScore: inferTrustScore(source, confidence),
+        url: article.url || '',
+    };
 };
 
 const EDGE_COLOR = (type) => ({
@@ -247,28 +306,99 @@ export default function OntologyEngine() {
     const [aiResponse, setAiResponse] = useState('');
     const [isQuerying, setIsQuerying] = useState(false);
     const [stats, setStats] = useState({ updates: 0, threats: 7, intel: 247 });
-    const selectedRef = useRef(null);
+    const pollingIndexRef = useRef(0);
 
     useEffect(() => {
-        const all = [];
-        Object.entries(FEEDS).forEach(([domain, items]) =>
-            items.forEach(item => all.push({ ...item, domain, time: new Date() })));
-        setFeeds(all.sort(() => Math.random() - 0.5).slice(0, 16));
+        let mounted = true;
+
+        const loadInitialFeeds = async () => {
+            const all = [];
+            const entries = Object.entries(DOMAIN_QUERIES);
+            for (let i = 0; i < entries.length; i++) {
+                const [domain, domainQuery] = entries[i];
+                try {
+                    // Stagger calls by 600ms to avoid quota flooding
+                    if (i > 0) await new Promise(r => setTimeout(r, 600));
+                    const data = await searchNews(domainQuery, { max: 8 });
+                    if (data?.articles?.length) {
+                        const mapped = data.articles
+                            .map((article) => mapArticleToFeed(article, domain))
+                            .filter((feedItem) => feedItem.isRelevantToRequested)
+                            .slice(0, 4);
+                        all.push(...mapped);
+                    }
+                } catch (e) {
+                    console.error(`Failed to load feeds for ${domain}`, e);
+                }
+            }
+            // Fallback: if all domain queries returned empty, try one broad query
+            if (all.length === 0) {
+                try {
+                    const data = await searchNews('india geopolitics defense economy technology climate', { max: 20 });
+                    if (data?.articles?.length) {
+                        const mapped = data.articles.map((article) => {
+                            const { domain: predicted } = classifyDomain(article);
+                            const fallbackDomain = predicted === 'unknown' ? 'geopolitics' : predicted;
+                            return mapArticleToFeed(article, fallbackDomain);
+                        });
+                        all.push(...mapped);
+                    }
+                } catch (e) {
+                    console.error('Fallback feed query failed', e);
+                }
+            }
+            if (mounted) {
+                setFeeds(sortFeeds(dedupeFeeds(all)).slice(0, 24));
+            }
+        };
+
+        loadInitialFeeds();
+
+        return () => {
+            mounted = false;
+        }
     }, []);
 
     useEffect(() => {
-        const id = setInterval(() => {
-            const domains = Object.keys(FEEDS);
-            const domain = domains[Math.floor(Math.random() * domains.length)];
-            const pool = FEEDS[domain];
-            const item = pool[Math.floor(Math.random() * pool.length)];
-            setFeeds(prev => [{ ...item, domain, time: new Date(), fresh: true }, ...prev.slice(0, 18)]);
-            setStats(prev => ({ ...prev, updates: prev.updates + 1 }));
-        }, 5000);
-        return () => clearInterval(id);
-    }, []);
+        let mounted = true;
+        const domains = Object.keys(DOMAIN_QUERIES);
 
-    useEffect(() => { selectedRef.current = selectedNode; }, [selectedNode]);
+        const pollLatestFeed = async () => {
+            const domain = activeDomain === 'all'
+                ? domains[pollingIndexRef.current % domains.length]
+                : activeDomain;
+            pollingIndexRef.current += 1;
+
+            try {
+                const data = await searchNews(DOMAIN_QUERIES[domain], { max: 6 });
+                if (!mounted || !data?.articles?.length) return;
+
+                const candidates = data.articles
+                    .map((article) => mapArticleToFeed(article, domain))
+                    .filter((feedItem) => feedItem.isRelevantToRequested);
+
+                if (!candidates.length) return;
+
+                const freshest = sortFeeds(candidates)[0];
+                setFeeds((prev) => sortFeeds(dedupeFeeds([{ ...freshest, fresh: true }, ...prev])).slice(0, 20));
+                setStats((prev) => ({ ...prev, updates: prev.updates + 1 }));
+            } catch (e) {
+                // Ignore silent errors on interval
+            }
+        };
+
+        const id = setInterval(pollLatestFeed, 30000); // 30s to avoid rate limits
+        return () => {
+            mounted = false;
+            clearInterval(id);
+        };
+    }, [activeDomain]);
+
+    useEffect(() => {
+        if (!feeds.length) return;
+        const threats = feeds.filter((item) => item.sev === 'CRIT' || item.sev === 'HIGH').length;
+        setStats((prev) => ({ ...prev, threats, intel: feeds.length }));
+    }, [feeds]);
 
     useEffect(() => {
         if (!svgRef.current) return;
@@ -282,21 +412,12 @@ export default function OntologyEngine() {
         const nodes = filtNodes.map(n => ({ ...n }));
         const links = filtEdges.map(e => ({ ...e, source: e.s, target: e.t }));
 
-        const defs = svg.append('defs');
-        Object.entries(DOMAINS).forEach(([key]) => {
-            const f = defs.append('filter').attr('id', `glow-${key}`).attr('x', '-50%').attr('y', '-50%').attr('width', '200%').attr('height', '200%');
-            f.append('feGaussianBlur').attr('stdDeviation', '4').attr('result', 'blur');
-            const m = f.append('feMerge');
-            m.append('feMergeNode').attr('in', 'blur');
-            m.append('feMergeNode').attr('in', 'SourceGraphic');
-        });
-
         const g0 = svg.append('g');
-        const gs = 44;
+        const gs = 48;
         for (let x = 0; x <= w; x += gs)
-            g0.append('line').attr('x1', x).attr('y1', 0).attr('x2', x).attr('y2', h).attr('stroke', '#051D30').attr('stroke-width', 0.5);
+            g0.append('line').attr('x1', x).attr('y1', 0).attr('x2', x).attr('y2', h).attr('stroke', '#e2e8f0').attr('stroke-width', 0.5);
         for (let y = 0; y <= h; y += gs)
-            g0.append('line').attr('x1', 0).attr('y1', y).attr('x2', w).attr('y2', y).attr('stroke', '#051D30').attr('stroke-width', 0.5);
+            g0.append('line').attr('x1', 0).attr('y1', y).attr('x2', w).attr('y2', y).attr('stroke', '#e2e8f0').attr('stroke-width', 0.5);
 
         const linkG = svg.append('g');
         const link = linkG.selectAll('line').data(links).join('line')
@@ -307,10 +428,9 @@ export default function OntologyEngine() {
         const linkLabelG = svg.append('g');
         const linkLabel = linkLabelG.selectAll('text').data(links.filter(d => d.label)).join('text')
             .attr('fill', d => EDGE_COLOR(d.type))
-            .attr('font-size', '7.5px')
-            .attr('font-family', "'Share Tech Mono', monospace")
+            .attr('font-size', '10px')
             .attr('text-anchor', 'middle')
-            .attr('opacity', 0.55)
+            .attr('opacity', 0.7)
             .text(d => d.label || '');
 
         const nodeG = svg.append('g');
@@ -323,23 +443,16 @@ export default function OntologyEngine() {
             )
             .on('click', (e, d) => { e.stopPropagation(); setSelectedNode(prev => prev?.id === d.id ? null : d); });
 
-        nodeEl.append('circle')
-            .attr('r', d => d.r + 10).attr('fill', 'none')
-            .attr('stroke', d => DOMAINS[d.domain]?.color || C.primary)
-            .attr('stroke-opacity', 0.15).attr('stroke-width', 1.5)
-            .attr('class', 'pulse');
-
         nodeEl.filter(d => d.id === 'india').append('circle')
-            .attr('r', d => d.r + 18).attr('fill', 'none')
-            .attr('stroke', C.saffron).attr('stroke-width', 1)
-            .attr('stroke-dasharray', '5,4').attr('stroke-opacity', 0.7);
+            .attr('r', d => d.r + 14).attr('fill', 'none')
+            .attr('stroke', C.saffron).attr('stroke-width', 2)
+            .attr('stroke-dasharray', '5,4').attr('stroke-opacity', 0.6);
 
         nodeEl.append('circle').attr('class', 'main-circle')
             .attr('r', d => d.r)
-            .attr('fill', d => `rgba(${hexRgb(DOMAINS[d.domain]?.color || C.primary)}, 0.1)`)
+            .attr('fill', d => `rgba(${hexRgb(DOMAINS[d.domain]?.color || C.primary)}, 0.12)`)
             .attr('stroke', d => DOMAINS[d.domain]?.color || C.primary)
-            .attr('stroke-width', d => d.id === 'india' ? 2.8 : 1.8)
-            .attr('filter', d => `url(#glow-${d.domain})`);
+            .attr('stroke-width', d => d.id === 'india' ? 2.5 : 1.5);
 
         nodeEl.append('text')
             .attr('text-anchor', 'middle').attr('dominant-baseline', 'central')
@@ -350,9 +463,8 @@ export default function OntologyEngine() {
             .attr('text-anchor', 'middle').attr('dy', d => d.r + 15)
             .attr('fill', d => DOMAINS[d.domain]?.color || C.primary)
             .attr('font-size', d => d.r >= 20 ? '10.5px' : '9px')
-            .attr('font-family', "'Share Tech Mono', monospace")
             .attr('font-weight', d => d.id === 'india' ? 'bold' : 'normal')
-            .attr('opacity', 0.9).text(d => d.label);
+            .attr('opacity', 0.95).text(d => d.label);
 
         const sim = d3.forceSimulation(nodes)
             .force('link', d3.forceLink(links).id(d => d.id).distance(d => 90 + (1 - d.w) * 70))
@@ -384,18 +496,47 @@ export default function OntologyEngine() {
         if (!query.trim() || isQuerying) return;
         setIsQuerying(true);
         setAiResponse('');
-        const ctx = selectedNode
-            ? `Active entity focus: ${selectedNode.label} (${DOMAINS[selectedNode.domain]?.label}). Classified intel: ${selectedNode.intel}. Tags: ${selectedNode.tags?.join(', ')}. Power Index: ${selectedNode.power}. Risk Level: ${selectedNode.risk}.`
-            : `Full global ontology active: ${NODES.length} entities, ${EDGES.length} relationships spanning 6 strategic domains.`;
 
-        // Simulate AI response with rich intelligence brief
-        await new Promise(r => setTimeout(r, 2000));
-        const responses = {
-            default: `▸ ASSESSMENT\nThe Global Ontology Engine identifies ${NODES.length} strategic entities across 6 domains with ${EDGES.length} active relationships. Current threat matrix shows elevated risk in cyber and climate domains.\n\n▸ KEY VECTORS\n• India's power index at 78/100 with strong upward trajectory driven by technology investment and diplomatic positioning\n• China-India tension coefficient at 0.75—LAC disengagement creates cautious optimism while structural competition intensifies\n• QUAD alliance effectiveness rising (power 85) as it expands from maritime security to technology supply chains\n• De-dollarization via BRICS+ gaining traction—Rupee settlement in 22 nations signals monetary multipolarity\n\n▸ INDIA ANGLE\nIndia occupies a unique node position—connected to both QUAD and BRICS+, enabling strategic hedging. The $10B semiconductor mission and ₹10,372Cr AI investment position India as a technology pivot state. Key risk: 85% oil import dependency creates strategic vulnerability exploitable by adversarial energy weaponization.\n\n▸ THREAT LEVEL: MEDIUM\nElevated but manageable—India's multi-alignment strategy provides resilience.\n\n▸ STRATEGIC RECOMMENDATION\n1. Accelerate rare earth processing capacity (current 6% reserves untapped) within 24 months to reduce China dependency\n2. Deepen QUAD+ technology sharing protocols focusing on AI and quantum—leverage iCET framework for semiconductor co-development`,
-        };
-        setAiResponse(responses.default);
+        await new Promise((resolve) => setTimeout(resolve, 900));
+
+        const scopeDomain = selectedNode?.domain || (activeDomain === 'all' ? null : activeDomain);
+        const scopedFeeds = scopeDomain ? feeds.filter((item) => item.domain === scopeDomain) : feeds;
+        const highRisk = scopedFeeds.filter((item) => item.sev === 'CRIT' || item.sev === 'HIGH').length;
+        const avgTrust = scopedFeeds.length
+            ? Math.round(scopedFeeds.reduce((sum, item) => sum + (item.trustScore || 0), 0) / scopedFeeds.length)
+            : 0;
+        const topSignals = sortFeeds(scopedFeeds)
+            .slice(0, 3)
+            .map((item, idx) => `${idx + 1}. [${item.sev}] ${item.text}`)
+            .join('\n');
+
+        const response = [
+            'ASSESSMENT',
+            `Scope: ${scopeDomain ? DOMAINS[scopeDomain]?.label : 'All Domains'}`,
+            `Signals analyzed: ${scopedFeeds.length}`,
+            `High-risk items: ${highRisk}`,
+            `Average provenance trust: ${avgTrust}/100`,
+            '',
+            'TOP SIGNALS',
+            topSignals || 'No matching live signals for this scope.',
+            '',
+            'ENTITY CONTEXT',
+            selectedNode
+                ? `${selectedNode.label}: ${selectedNode.intel}`
+                : 'No entity selected. Select a node to include graph context in the brief.',
+            '',
+            'QUERY',
+            query.trim(),
+            '',
+            'RECOMMENDATION',
+            highRisk > 0
+                ? 'Escalate CRIT/HIGH items to analyst review and run what-if impact simulation on connected entities.'
+                : 'Continue monitoring and refresh domain feeds before escalation.',
+        ].join('\n');
+
+        setAiResponse(response);
         setIsQuerying(false);
-    }, [query, isQuerying, selectedNode]);
+    }, [query, isQuerying, selectedNode, activeDomain, feeds]);
 
     const visibleFeeds = activeDomain === 'all' ? feeds : feeds.filter(f => f.domain === activeDomain);
 
@@ -404,41 +545,32 @@ export default function OntologyEngine() {
             width: '100%', height: '100%',
             display: 'flex', flexDirection: 'column', overflow: 'hidden',
         }}>
-            {/* HEADER */}
+            {/* HEADER — Government style: solid bar */}
             <div style={{
-                flexShrink: 0, minHeight: 48,
-                background: 'linear-gradient(180deg,#021020 0%,#010C18 100%)',
-                borderBottom: `1px solid ${C.border}`,
-                display: 'flex', alignItems: 'center', gap: 14, padding: '0 16px',
+                flexShrink: 0, minHeight: 52,
+                background: C.primary, color: C.white,
+                display: 'flex', alignItems: 'center', gap: 16, padding: '0 20px',
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 200, flexShrink: 0 }}>
-                    <div>
-                        <div style={{
-                            fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 13,
-                            color: C.primary, letterSpacing: '2.5px', lineHeight: 1.1
-                        }}>
-                            GLOBAL ONTOLOGY ENGINE
-                        </div>
-                        <div style={{ fontSize: 8, color: C.text, letterSpacing: '2.5px', lineHeight: 1.5 }}>
-                            STRATEGIC INTELLIGENCE SYSTEM v4.2 · CLASSIFIED
-                        </div>
+                <div style={{ minWidth: 220, flexShrink: 0 }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, }}>
+                        Global Ontology Engine
+                    </div>
+                    <div style={{ fontSize: 12, opacity: 0.9 }}>
+                        Strategic Intelligence System v4.2
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: 5, flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
-                    {[['all', 'ALL DOMAINS', C.primary], ...Object.entries(DOMAINS).map(([k, v]) => [k, `${v.icon} ${v.short}`, v.color])].map(([key, label, color]) => {
+                <div style={{ display: 'flex', gap: 6, flex: 1, justifyContent: 'center', flexWrap: 'wrap' }}>
+                    {[['all', 'All Domains', C.white], ...Object.entries(DOMAINS).map(([k, v]) => [k, `${v.icon} ${v.label}`, 'rgba(255,255,255,0.9)'])].map(([key, label, color]) => {
                         const isActive = key === 'all' ? activeDomain === 'all' : activeDomain === key;
                         return (
                             <button key={key}
                                 onClick={() => setActiveDomain(isActive && key !== 'all' ? 'all' : key)}
                                 style={{
-                                    padding: '4px 11px', fontSize: 9, letterSpacing: '1.2px',
-                                    background: isActive ? `rgba(${hexRgb(color)},0.18)` : 'transparent',
-                                    border: `1px solid ${isActive ? color : C.border}`,
-                                    color: isActive ? color : C.text,
-                                    borderRadius: 2, fontFamily: "'Share Tech Mono',monospace",
-                                    opacity: isActive ? 1 : 0.6,
-                                    transition: 'all .2s',
+                                    padding: '6px 12px', fontSize: 13,
+                                    background: isActive ? 'rgba(255,255,255,0.2)' : 'transparent',
+                                    border: `1px solid ${isActive ? C.white : 'rgba(255,255,255,0.4)'}`,
+                                    color: C.white, borderRadius: 4,
                                 }}>
                                 {label}
                             </button>
@@ -446,16 +578,16 @@ export default function OntologyEngine() {
                     })}
                 </div>
 
-                <div style={{ display: 'flex', gap: 18, flexShrink: 0, alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: 20, flexShrink: 0, alignItems: 'center' }}>
                     {[
-                        { l: 'ENTITIES', v: activeDomain === 'all' ? NODES.length : NODES.filter(n => n.domain === activeDomain).length },
-                        { l: 'RELATIONS', v: EDGES.length },
-                        { l: 'LIVE OPS', v: stats.updates },
-                        { l: 'ALERTS', v: stats.threats, c: C.red },
+                        { l: 'Entities', v: activeDomain === 'all' ? NODES.length : NODES.filter(n => n.domain === activeDomain).length },
+                        { l: 'Relations', v: EDGES.length },
+                        { l: 'Updates', v: stats.updates },
+                        { l: 'Alerts', v: stats.threats },
                     ].map(s => (
                         <div key={s.l} style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: 16, fontWeight: 'bold', color: s.c || C.primary, lineHeight: 1, fontFamily: "'Rajdhani',sans-serif" }}>{s.v}</div>
-                            <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px' }}>{s.l}</div>
+                            <div style={{ fontSize: 16, fontWeight: 700 }}>{s.v}</div>
+                            <div style={{ fontSize: 11, opacity: 0.85 }}>{s.l}</div>
                         </div>
                     ))}
                 </div>
@@ -465,72 +597,72 @@ export default function OntologyEngine() {
             <div style={{ flex: 1, display: 'flex', overflow: 'hidden', minHeight: 0 }}>
                 {/* LEFT: Live Intel Feed */}
                 <div style={{
-                    width: 255, flexShrink: 0,
+                    width: 260, flexShrink: 0,
                     background: C.panel, borderRight: `1px solid ${C.border}`,
                     display: 'flex', flexDirection: 'column', overflow: 'hidden',
                 }}>
                     <div style={{
-                        padding: '7px 12px', borderBottom: `1px solid ${C.border}`,
+                        padding: '10px 14px', borderBottom: `2px solid ${C.primary}`,
                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        background: '#f8fafc',
                     }}>
-                        <span style={{ fontSize: 9, letterSpacing: '2px', color: C.text }}>LIVE INTEL FEED</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.green, animation: 'pulse 1.5s infinite' }} />
-                            <span style={{ fontSize: 8, color: C.green, letterSpacing: '1px' }}>STREAMING</span>
+                        <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>Live Intel Feed</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.green }} />
+                            <span style={{ fontSize: 11, color: C.textMuted }}>Active</span>
                         </div>
                     </div>
-                    <div style={{ overflowY: 'auto', flex: 1, padding: 8 }}>
+                    <div style={{ overflowY: 'auto', flex: 1, padding: 10 }}>
                         {visibleFeeds.map((f, i) => (
                             <div key={i} className={f.fresh ? 'feed-new' : ''} style={{
-                                marginBottom: 5, padding: '7px 10px',
-                                background: f.fresh
-                                    ? `rgba(${hexRgb(DOMAINS[f.domain]?.color || C.primary)}, 0.07)`
-                                    : 'rgba(2,10,20,.85)',
-                                border: `1px solid ${f.fresh ? (DOMAINS[f.domain]?.color || C.primary) + '33' : C.borderSoft}`,
-                                borderLeft: `3px solid ${SEV[f.sev] || C.text}`,
-                                borderRadius: 2,
+                                marginBottom: 8, padding: '10px 12px',
+                                background: f.fresh ? `rgba(${hexRgb(DOMAINS[f.domain]?.color || C.primary)}, 0.06)` : C.bg,
+                                border: `1px solid ${C.border}`,
+                                borderLeft: `4px solid ${SEV[f.sev] || C.text}`,
+                                borderRadius: 4,
                             }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                                    <span style={{ fontSize: 8, color: SEV[f.sev], letterSpacing: '1px', fontWeight: 'bold' }}>{f.sev}</span>
-                                    <span style={{ fontSize: 8, color: DOMAINS[f.domain]?.color, opacity: .75 }}>{DOMAINS[f.domain]?.short}</span>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                    <span style={{ fontSize: 10, color: SEV[f.sev], fontWeight: 600 }}>{f.sev}</span>
+                                    <span style={{ fontSize: 10, color: C.textMuted }}>{DOMAINS[f.domain]?.short}</span>
                                 </div>
-                                <div style={{ fontSize: 9.5, color: C.textBright, lineHeight: 1.55 }}>{f.text}</div>
-                                <div style={{ fontSize: 8, color: C.text, marginTop: 4 }}>{f.time?.toLocaleTimeString?.() || '—'}</div>
+                                <div style={{ fontSize: 12, color: C.text, lineHeight: 1.5 }}>{f.text}</div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 6, fontSize: 10, color: C.textMuted }}>
+                                    <span>{f.source || 'Unknown source'}</span>
+                                    <span>Trust {f.trustScore || 0}</span>
+                                </div>
+                                <div style={{ fontSize: 11, color: C.textMuted, marginTop: 4 }}>{f.time?.toLocaleTimeString?.() || '-'}</div>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* CENTER: Knowledge Graph */}
-                <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
-                    <div style={{
-                        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1,
-                        background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,5,12,.04) 2px, rgba(0,5,12,.04) 4px)',
-                    }} />
+                <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: C.bg }}>
                     <svg ref={svgRef} style={{ width: '100%', height: '100%', display: 'block' }} />
-                    <div style={{ position: 'absolute', top: 10, left: 10, fontSize: 8, color: C.text, letterSpacing: '1.5px', zIndex: 2 }}>
-                        DRAG NODES · CLICK TO ANALYZE
+                    <div style={{ position: 'absolute', top: 12, left: 12, fontSize: 11, color: C.textMuted, zIndex: 2 }}>
+                        Drag nodes · Click to analyze
                     </div>
                     <div style={{
-                        position: 'absolute', top: 10, right: 10, zIndex: 2,
+                        position: 'absolute', top: 12, right: 12, zIndex: 2,
                         display: 'flex', flexDirection: 'column', gap: 4,
-                        background: 'rgba(1,12,24,.85)', padding: '8px 10px',
-                        border: `1px solid ${C.border}`, borderRadius: 2,
+                        background: C.panel, padding: '10px 12px',
+                        border: `1px solid ${C.border}`, borderRadius: 4,
+                        boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
                     }}>
                         {Object.entries(DOMAINS).map(([k, v]) => (
                             <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <div style={{ width: 7, height: 7, borderRadius: '50%', background: v.color, opacity: .85 }} />
-                                <span style={{ fontSize: 8, color: C.text }}>{v.label}</span>
+                                <div style={{ width: 8, height: 8, borderRadius: '50%', background: v.color }} />
+                                <span style={{ fontSize: 11, color: C.text }}>{v.label}</span>
                             </div>
                         ))}
                     </div>
                     <div style={{
-                        position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)',
-                        fontSize: 8, color: C.text, letterSpacing: '2px', zIndex: 2,
-                        background: 'rgba(1,12,24,.85)', padding: '4px 14px',
-                        border: `1px solid ${C.border}`, borderRadius: 2,
+                        position: 'absolute', bottom: 12, left: '50%', transform: 'translateX(-50%)',
+                        fontSize: 11, color: C.textMuted, zIndex: 2,
+                        background: C.panel, padding: '6px 16px',
+                        border: `1px solid ${C.border}`, borderRadius: 4,
                     }}>
-                        GLOBAL ONTOLOGY GRAPH · {NODES.length} ENTITIES · {EDGES.length} RELATIONSHIPS
+                        {NODES.length} entities · {EDGES.length} relationships
                     </div>
                 </div>
 
@@ -544,36 +676,36 @@ export default function OntologyEngine() {
                         {selectedNode ? (
                             <>
                                 <div style={{
-                                    padding: '9px 12px',
-                                    background: `rgba(${hexRgb(DOMAINS[selectedNode.domain]?.color || C.primary)},.1)`,
+                                    padding: '10px 14px',
+                                    background: `rgba(${hexRgb(DOMAINS[selectedNode.domain]?.color || C.primary)}, 0.08)`,
                                     borderBottom: `1px solid ${C.border}`,
                                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                         <span style={{ fontSize: 20 }}>{DOMAINS[selectedNode.domain]?.icon}</span>
                                         <div>
-                                            <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 14, color: C.white, lineHeight: 1.1 }}>
+                                            <div style={{ fontWeight: 700, fontSize: 14, color: C.text, lineHeight: 1.1 }}>
                                                 {selectedNode.label}
                                             </div>
-                                            <div style={{ fontSize: 8, color: DOMAINS[selectedNode.domain]?.color, letterSpacing: '1.5px' }}>
-                                                {DOMAINS[selectedNode.domain]?.label.toUpperCase()}
+                                            <div style={{ fontSize: 11, color: C.textMuted }}>
+                                                {DOMAINS[selectedNode.domain]?.label}
                                             </div>
                                         </div>
                                     </div>
                                     <div style={{
-                                        padding: '2px 8px', fontSize: 8, letterSpacing: '1px', borderRadius: 2,
+                                        padding: '3px 8px', fontSize: 11, fontWeight: 600, borderRadius: 4,
                                         border: `1px solid ${selectedNode.risk === 'Critical' ? C.red : selectedNode.risk === 'High' ? C.orange : C.gold}`,
                                         color: selectedNode.risk === 'Critical' ? C.red : selectedNode.risk === 'High' ? C.orange : C.gold,
-                                    }}>{selectedNode.risk?.toUpperCase()}</div>
+                                    }}>{selectedNode.risk}</div>
                                 </div>
-                                <div style={{ padding: '10px 12px', maxHeight: 220, overflowY: 'auto' }}>
-                                    <div style={{ fontSize: 9.5, color: C.textBright, lineHeight: 1.65, marginBottom: 10 }}>
+                                <div style={{ padding: '12px 14px', maxHeight: 220, overflowY: 'auto' }}>
+                                    <div style={{ fontSize: 12, color: C.text, lineHeight: 1.6, marginBottom: 12 }}>
                                         {selectedNode.intel}
                                     </div>
-                                    <div style={{ marginBottom: 10 }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 3 }}>
-                                            <span style={{ fontSize: 8, color: C.text, letterSpacing: '1px' }}>POWER INDEX</span>
-                                            <span style={{ fontSize: 9, color: C.primary }}>{selectedNode.power} / 100</span>
+                                    <div style={{ marginBottom: 12 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                                            <span style={{ fontSize: 11, color: C.textMuted }}>Power Index</span>
+                                            <span style={{ fontSize: 12, fontWeight: 600, color: C.primary }}>{selectedNode.power} / 100</span>
                                         </div>
                                         <div style={{ height: 3, background: C.borderSoft, borderRadius: 2 }}>
                                             <div style={{
@@ -586,12 +718,12 @@ export default function OntologyEngine() {
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
                                         {(selectedNode.tags || []).map(t => (
                                             <span key={t} style={{
-                                                fontSize: 8, padding: '2px 7px',
-                                                border: `1px solid ${C.border}`, color: C.text, borderRadius: 2,
+                                                fontSize: 11, padding: '4px 8px',
+                                                border: `1px solid ${C.border}`, color: C.text, borderRadius: 4,
                                             }}>{t}</span>
                                         ))}
                                     </div>
-                                    <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px', marginBottom: 5 }}>CONNECTED ENTITIES</div>
+                                    <div style={{ fontSize: 11, fontWeight: 600, color: C.text, marginBottom: 6 }}>Connected Entities</div>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                                         {EDGES.filter(e => e.s === selectedNode.id || e.t === selectedNode.id).slice(0, 10).map(e => {
                                             const oid = e.s === selectedNode.id ? e.t : e.s;
@@ -599,11 +731,11 @@ export default function OntologyEngine() {
                                             if (!other) return null;
                                             return (
                                                 <button key={oid} onClick={() => setSelectedNode(other)} style={{
-                                                    fontSize: 8, padding: '2px 7px',
-                                                    background: `rgba(${hexRgb(DOMAINS[other.domain]?.color || C.primary)},.1)`,
-                                                    border: `1px solid ${(DOMAINS[other.domain]?.color || C.primary)}44`,
+                                                    fontSize: 11, padding: '4px 8px',
+                                                    background: `rgba(${hexRgb(DOMAINS[other.domain]?.color || C.primary)}, 0.1)`,
+                                                    border: `1px solid ${C.border}`,
                                                     color: DOMAINS[other.domain]?.color || C.primary,
-                                                    borderRadius: 2, fontFamily: "'Share Tech Mono',monospace",
+                                                    borderRadius: 4,
                                                 }}>{other.label}</button>
                                             );
                                         })}
@@ -611,10 +743,10 @@ export default function OntologyEngine() {
                                 </div>
                             </>
                         ) : (
-                            <div style={{ padding: '18px 12px', textAlign: 'center' }}>
-                                <div style={{ fontSize: 28, opacity: .3, marginBottom: 8 }}>🕸️</div>
-                                <div style={{ fontSize: 9, color: C.text, letterSpacing: '1px', lineHeight: 1.8 }}>
-                                    CLICK ANY NODE TO VIEW<br />ENTITY INTELLIGENCE BRIEF
+                            <div style={{ padding: '24px 14px', textAlign: 'center' }}>
+                                <div style={{ fontSize: 32, opacity: 0.4, marginBottom: 10 }}>🕸️</div>
+                                <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.7 }}>
+                                    Click any node to view<br />entity intelligence brief
                                 </div>
                             </div>
                         )}
@@ -623,99 +755,81 @@ export default function OntologyEngine() {
                     {/* AI Query Panel */}
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
                         <div style={{
-                            padding: '7px 12px', borderBottom: `1px solid ${C.border}`,
+                            padding: '10px 14px', borderBottom: `2px solid ${C.primary}`,
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
+                            background: '#f8fafc',
                         }}>
-                            <span style={{ fontSize: 9, letterSpacing: '2px', color: C.text }}>AI STRATEGIC QUERY</span>
-                            <div style={{
-                                fontSize: 8, color: C.purple, padding: '1px 7px',
-                                border: `1px solid ${C.purple}55`, borderRadius: 2, letterSpacing: '1px'
-                            }}>
-                                AI-POWERED
-                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>Strategic Query</span>
                         </div>
-                        <div style={{ padding: '8px 10px', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
-                            <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px', marginBottom: 5 }}>QUICK ANALYSIS</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        <div style={{ padding: '10px 14px', borderBottom: `1px solid ${C.border}`, flexShrink: 0 }}>
+                            <div style={{ fontSize: 11, color: C.textMuted, marginBottom: 6 }}>Quick Analysis</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                                 {QUICK_QUERIES.map(q => (
                                     <button key={q} onClick={() => setQuery(q)} style={{
-                                        fontSize: 8, padding: '3px 7px',
-                                        background: 'transparent', border: `1px solid ${C.border}`,
-                                        color: C.text, borderRadius: 2, fontFamily: "'Share Tech Mono',monospace",
-                                        transition: 'all .2s',
+                                        fontSize: 11, padding: '5px 10px',
+                                        background: C.bg, border: `1px solid ${C.border}`,
+                                        color: C.text, borderRadius: 4,
                                     }}>{q}</button>
                                 ))}
                             </div>
                         </div>
-                        <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px', minHeight: 0 }}>
+                        <div style={{ flex: 1, overflowY: 'auto', padding: '12px 14px', minHeight: 0 }}>
                             {isQuerying ? (
-                                <div style={{ textAlign: 'center', padding: '24px 0' }}>
-                                    <div style={{ fontSize: 20, animation: 'spin 1.5s linear infinite', marginBottom: 10 }}>◈</div>
-                                    <div style={{ fontSize: 10, color: C.primary, marginBottom: 6 }}>
-                                        PROCESSING INTELLIGENCE QUERY<span className="blink">_</span>
-                                    </div>
-                                    <div style={{ fontSize: 8.5, color: C.text, lineHeight: 1.7 }}>
-                                        Cross-referencing {NODES.length} ontology entities<br />
-                                        Analyzing {EDGES.length} strategic relationships<br />
-                                        Generating classified intelligence brief
+                                <div style={{ textAlign: 'center', padding: '28px 0' }}>
+                                    <div style={{ fontSize: 18, marginBottom: 10, color: C.primary }}>Processing…</div>
+                                    <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.7 }}>
+                                        Analyzing {NODES.length} entities and {EDGES.length} relationships
                                     </div>
                                 </div>
                             ) : aiResponse ? (
-                                <div style={{ fontSize: 9.5, color: C.textBright, lineHeight: 1.8, whiteSpace: 'pre-wrap' }}>
+                                <div style={{ fontSize: 12, color: C.text, lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
                                     {aiResponse}
                                 </div>
                             ) : (
-                                <div style={{ textAlign: 'center', padding: '24px 0' }}>
-                                    <div style={{ fontSize: 22, opacity: .3, marginBottom: 8 }}>◈</div>
-                                    <div style={{ fontSize: 10, color: C.textMid, marginBottom: 6, letterSpacing: '1px' }}>
-                                        GOE INTELLIGENCE READY
-                                    </div>
-                                    <div style={{ fontSize: 8.5, color: C.text, lineHeight: 1.8 }}>
-                                        Select a query chip above or type<br />
-                                        your own strategic analysis request.<br />
+                                <div style={{ textAlign: 'center', padding: '28px 0' }}>
+                                    <div style={{ fontSize: 24, opacity: 0.4, marginBottom: 8 }}>◈</div>
+                                    <div style={{ fontSize: 12, color: C.textMuted, lineHeight: 1.7 }}>
+                                        Select a query above or type your own.<br />
                                         Click a node first for entity context.
                                     </div>
                                 </div>
                             )}
                         </div>
                         <div style={{
-                            padding: '10px 12px', borderTop: `1px solid ${C.border}`,
-                            background: 'rgba(2,10,20,.95)', flexShrink: 0,
+                            padding: '10px 14px', borderTop: `1px solid ${C.border}`,
+                            background: C.bg, flexShrink: 0,
                         }}>
                             <div style={{
-                                display: 'flex', gap: 6,
-                                border: `1px solid ${query.trim() ? C.primary + '66' : C.border}`,
-                                borderRadius: 3, background: 'rgba(1,8,16,.9)',
-                                transition: 'border-color .2s',
+                                display: 'flex', gap: 8,
+                                border: `1px solid ${query.trim() ? C.primary : C.border}`,
+                                borderRadius: 4, background: C.panel,
                             }}>
                                 <textarea
                                     value={query}
                                     onChange={e => setQuery(e.target.value)}
                                     onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleQuery(); } }}
-                                    placeholder="Query the intelligence graph..."
+                                    placeholder="Query the intelligence graph…"
                                     style={{
-                                        flex: 1, padding: '8px 10px', background: 'transparent', border: 'none',
-                                        color: C.textBright, fontSize: 10,
-                                        fontFamily: "'Share Tech Mono',monospace",
-                                        minHeight: 54, maxHeight: 90, lineHeight: 1.6,
+                                        flex: 1, padding: '10px 12px', background: 'transparent', border: 'none',
+                                        color: C.text, fontSize: 12,
+                                        minHeight: 50, maxHeight: 90, lineHeight: 1.5,
                                     }}
                                 />
                                 <button
                                     onClick={handleQuery}
                                     disabled={isQuerying || !query.trim()}
                                     style={{
-                                        padding: '8px 12px', margin: '4px',
-                                        background: isQuerying || !query.trim() ? 'transparent' : C.primaryGlow,
-                                        border: `1px solid ${isQuerying || !query.trim() ? C.border : C.primary}`,
-                                        color: isQuerying || !query.trim() ? C.text : C.primary,
-                                        borderRadius: 2, fontSize: 14, fontWeight: 'bold',
-                                        fontFamily: "'Share Tech Mono',monospace",
-                                        alignSelf: 'flex-end', cursor: isQuerying || !query.trim() ? 'default' : 'pointer',
+                                        padding: '8px 14px', margin: '6px',
+                                        background: isQuerying || !query.trim() ? C.bg : C.primary,
+                                        border: 'none',
+                                        color: isQuerying || !query.trim() ? C.textMuted : C.white,
+                                        borderRadius: 4, fontSize: 13, fontWeight: 600,
+                                        alignSelf: 'flex-end',
                                     }}
-                                >{isQuerying ? '◌' : '▶'}</button>
+                                >{isQuerying ? '…' : 'Run'}</button>
                             </div>
-                            <div style={{ fontSize: 8, color: C.text, marginTop: 4, letterSpacing: '.5px' }}>
-                                ↵ ENTER to query · SHIFT+ENTER for newline
+                            <div style={{ fontSize: 11, color: C.textMuted, marginTop: 6 }}>
+                                Enter to query · Shift+Enter for newline
                             </div>
                         </div>
                     </div>
@@ -724,3 +838,5 @@ export default function OntologyEngine() {
         </div>
     );
 }
+
+

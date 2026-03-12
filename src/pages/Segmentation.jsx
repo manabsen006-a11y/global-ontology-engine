@@ -102,39 +102,36 @@ export default function Segmentation() {
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
             <div style={{
-                flexShrink: 0, padding: '10px 20px',
-                background: 'linear-gradient(180deg,#021020,#010C18)',
-                borderBottom: `1px solid ${C.border}`,
+                flexShrink: 0, padding: '14px 20px',
+                background: C.primary, color: C.white,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             }}>
                 <div>
-                    <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 16, color: C.primary, letterSpacing: '2px' }}>
-                        🎯 INTELLIGENT SEGMENTATION ENGINE
+                    <div style={{ fontWeight: 700, fontSize: 16 }}>
+                        Intelligent Segmentation
                     </div>
-                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px' }}>
-                        BOOTH-LEVEL VOTER ANALYTICS · KEY VOTER IDENTIFICATION
+                    <div style={{ fontSize: 12, opacity: 0.9 }}>
+                        Booth-level voter analytics · Key voter identification
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
                     <button
                         onClick={() => { setSelectedConstituency('all'); setSelectedBooth(null); }}
                         style={{
-                            padding: '5px 14px', fontSize: 9, letterSpacing: '1px',
-                            background: selectedConstituency === 'all' ? C.primaryGlow : 'transparent',
-                            border: `1px solid ${selectedConstituency === 'all' ? C.primary : C.border}`,
-                            color: selectedConstituency === 'all' ? C.primary : C.text,
-                            borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                        }}>ALL</button>
+                            padding: '6px 14px', fontSize: 12,
+                            background: selectedConstituency === 'all' ? 'rgba(255,255,255,0.2)' : 'transparent',
+                            border: `1px solid ${selectedConstituency === 'all' ? C.white : 'rgba(255,255,255,0.5)'}`,
+                            color: C.white, borderRadius: 4,
+                        }}>All</button>
                     {CONSTITUENCIES.map(c => (
                         <button key={c}
                             onClick={() => { setSelectedConstituency(c); setSelectedBooth(null); }}
                             style={{
-                                padding: '5px 14px', fontSize: 9, letterSpacing: '1px',
-                                background: selectedConstituency === c ? C.primaryGlow : 'transparent',
-                                border: `1px solid ${selectedConstituency === c ? C.primary : C.border}`,
-                                color: selectedConstituency === c ? C.primary : C.text,
-                                borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                            }}>{c.toUpperCase().slice(0, 8)}</button>
+                                padding: '6px 14px', fontSize: 12,
+                                background: selectedConstituency === c ? 'rgba(255,255,255,0.2)' : 'transparent',
+                                border: `1px solid ${selectedConstituency === c ? C.white : 'rgba(255,255,255,0.5)'}`,
+                                color: C.white, borderRadius: 4,
+                            }}>{c.slice(0, 10)}</button>
                     ))}
                 </div>
             </div>
@@ -189,8 +186,8 @@ export default function Segmentation() {
                                 display: 'flex', justifyContent: 'space-between', padding: '6px 0',
                                 borderBottom: `1px solid ${C.borderSoft}`,
                             }}>
-                                <span style={{ fontSize: 9, color: C.text, letterSpacing: '1px' }}>{m.l}</span>
-                                <span style={{ fontSize: 11, color: m.c, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700 }}>{m.v}</span>
+                                <span style={{ fontSize: 9, color: C.text, }}>{m.l}</span>
+                                <span style={{ fontSize: 11, color: m.c, fontWeight: 700 }}>{m.v}</span>
                             </div>
                         ))}
                     </div>
@@ -198,7 +195,7 @@ export default function Segmentation() {
 
                 {/* Center: Booth Grid */}
                 <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 12 }}>
+                    <div style={{ fontSize: 9, color: C.text, marginBottom: 12 }}>
                         BOOTH MATRIX — {filtered.length} BOOTHS · CLICK FOR DETAILS
                     </div>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10 }}>
@@ -213,7 +210,7 @@ export default function Segmentation() {
                                         animation: 'slideUp 0.4s ease forwards',
                                     }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                                        <span style={{ fontSize: 11, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: C.white }}>
+                                        <span style={{ fontSize: 11, fontWeight: 700, color: C.textBright }}>
                                             {booth.name}
                                         </span>
                                         <span style={{
@@ -223,7 +220,7 @@ export default function Segmentation() {
                                             border: `1px solid ${booth.keyVoterScore > 75 ? C.green : booth.keyVoterScore > 50 ? C.gold : C.red}44`,
                                         }}>KV:{booth.keyVoterScore}</span>
                                     </div>
-                                    <div style={{ fontSize: 8, color: C.text, marginBottom: 8, letterSpacing: '1px' }}>
+                                    <div style={{ fontSize: 8, color: C.text, marginBottom: 8, }}>
                                         {booth.constituency} · {booth.total.toLocaleString()} voters
                                     </div>
                                     {/* Mini segment bars */}
@@ -261,15 +258,15 @@ export default function Segmentation() {
                                 background: `rgba(0,200,255,.06)`,
                                 borderBottom: `1px solid ${C.border}`,
                             }}>
-                                <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 16, color: C.white }}>
+                                <div style={{ fontWeight: 700, fontSize: 16, color: C.textBright }}>
                                     {selectedBooth.name}
                                 </div>
-                                <div style={{ fontSize: 9, color: C.primary, letterSpacing: '1.5px' }}>
+                                <div style={{ fontSize: 9, color: C.primary, }}>
                                     {selectedBooth.constituency.toUpperCase()} · ID: {selectedBooth.id}
                                 </div>
                             </div>
                             <div style={{ padding: 14 }}>
-                                <div style={{ fontSize: 9, color: C.text, letterSpacing: '1.5px', marginBottom: 10 }}>SEGMENT BREAKDOWN</div>
+                                <div style={{ fontSize: 9, color: C.text, marginBottom: 10 }}>SEGMENT BREAKDOWN</div>
                                 {SEGMENTS.map(seg => {
                                     const v = selectedBooth.segments[seg.id] || 0;
                                     const pct = ((v / selectedBooth.total) * 100).toFixed(1);
@@ -286,13 +283,13 @@ export default function Segmentation() {
                                     );
                                 })}
                                 <div style={{ marginTop: 16, padding: 10, background: 'rgba(0,200,255,.05)', border: `1px solid ${C.border}`, borderRadius: 4 }}>
-                                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '1.5px', marginBottom: 8 }}>KEY VOTER ANALYSIS</div>
+                                    <div style={{ fontSize: 9, color: C.text, marginBottom: 8 }}>KEY VOTER ANALYSIS</div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                                         <div style={{
                                             width: 50, height: 50, borderRadius: '50%',
                                             border: `3px solid ${selectedBooth.keyVoterScore > 75 ? C.green : selectedBooth.keyVoterScore > 50 ? C.gold : C.red}`,
                                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 18,
+                                            fontWeight: 700, fontSize: 18,
                                             color: selectedBooth.keyVoterScore > 75 ? C.green : selectedBooth.keyVoterScore > 50 ? C.gold : C.red,
                                         }}>{selectedBooth.keyVoterScore}</div>
                                         <div>
@@ -311,7 +308,7 @@ export default function Segmentation() {
                                     </div>
                                 </div>
                                 <div style={{ marginTop: 12, padding: 10, background: 'rgba(0,200,255,.03)', border: `1px solid ${C.borderSoft}`, borderRadius: 4 }}>
-                                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '1.5px', marginBottom: 6 }}>PERFORMANCE</div>
+                                    <div style={{ fontSize: 9, color: C.text, marginBottom: 6 }}>PERFORMANCE</div>
                                     {[
                                         { l: 'Last Turnout', v: `${selectedBooth.turnoutLast}%`, c: selectedBooth.turnoutLast > 70 ? C.green : C.gold },
                                         { l: 'Swing Factor', v: `${selectedBooth.swing}%`, c: parseFloat(selectedBooth.swing) > 0 ? C.green : C.red },
@@ -319,7 +316,7 @@ export default function Segmentation() {
                                     ].map(m => (
                                         <div key={m.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: `1px solid ${C.borderSoft}` }}>
                                             <span style={{ fontSize: 9, color: C.text }}>{m.l}</span>
-                                            <span style={{ fontSize: 10, color: m.c, fontFamily: "'Rajdhani',sans-serif", fontWeight: 600 }}>{m.v}</span>
+                                            <span style={{ fontSize: 10, color: m.c, fontWeight: 600 }}>{m.v}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -328,7 +325,7 @@ export default function Segmentation() {
                     ) : (
                         <div style={{ padding: 30, textAlign: 'center' }}>
                             <div style={{ fontSize: 40, opacity: .3, marginBottom: 12 }}>🎯</div>
-                            <div style={{ fontSize: 10, color: C.text, letterSpacing: '1px', lineHeight: 1.8 }}>
+                            <div style={{ fontSize: 10, color: C.text, lineHeight: 1.8 }}>
                                 SELECT A BOOTH TO VIEW<br />DETAILED VOTER SEGMENTATION<br />AND KEY VOTER ANALYSIS
                             </div>
                         </div>

@@ -64,24 +64,22 @@ export default function Beneficiaries() {
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {/* Header */}
-            <div style={{ flexShrink: 0, padding: '10px 20px', background: 'linear-gradient(180deg,#021020,#010C18)', borderBottom: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ flexShrink: 0, padding: '14px 20px', background: C.primary, color: C.white, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 16, color: C.primary, letterSpacing: '2px' }}>
-                        🏥 BENEFICIARY LINKAGE SYSTEM
+                    <div style={{ fontWeight: 700, fontSize: 16 }}>
+                        Beneficiary Linkage System
                     </div>
-                    <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px' }}>
-                        GOVERNMENT SCHEME TRACKING · BOOTH-WISE MAPPING · CITIZEN BOND
+                    <div style={{ fontSize: 12, opacity: 0.9 }}>
+                        Government scheme tracking · Booth-wise mapping
                     </div>
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
                     {['overview', 'booths', 'lookup'].map(t => (
                         <button key={t} onClick={() => setTab(t)} style={{
-                            padding: '5px 14px', fontSize: 9, letterSpacing: '1.5px',
-                            background: tab === t ? C.primaryGlow : 'transparent',
-                            border: `1px solid ${tab === t ? C.primary : C.border}`,
-                            color: tab === t ? C.primary : C.text,
-                            borderRadius: 3, fontFamily: "'Share Tech Mono',monospace",
-                            textTransform: 'uppercase',
+                            padding: '6px 14px', fontSize: 12,
+                            background: tab === t ? 'rgba(255,255,255,0.2)' : 'transparent',
+                            border: `1px solid ${tab === t ? C.white : 'rgba(255,255,255,0.5)'}`,
+                            color: C.white, borderRadius: 4,
                         }}>{t}</button>
                     ))}
                 </div>
@@ -97,8 +95,8 @@ export default function Beneficiaries() {
                 ].map(s => (
                     <div key={s.l} className="stat-card" style={{ padding: '10px 12px' }}>
                         <div style={{ fontSize: 10, marginBottom: 4 }}>{s.icon}</div>
-                        <div style={{ fontSize: 20, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, color: s.c }}>{s.v}</div>
-                        <div style={{ fontSize: 8, color: C.text, letterSpacing: '1px' }}>{s.l}</div>
+                        <div style={{ fontSize: 20, fontWeight: 700, color: s.c }}>{s.v}</div>
+                        <div style={{ fontSize: 8, color: C.text, }}>{s.l}</div>
                     </div>
                 ))}
             </div>
@@ -109,7 +107,7 @@ export default function Beneficiaries() {
                     <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
                         {/* Scheme Cards */}
                         <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-                            <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 12 }}>SCHEME PERFORMANCE MATRIX</div>
+                            <div style={{ fontSize: 9, color: C.text, marginBottom: 12 }}>SCHEME PERFORMANCE MATRIX</div>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
                                 {SCHEMES.map(s => {
                                     const pct = ((s.linked / s.target) * 100).toFixed(0);
@@ -130,7 +128,7 @@ export default function Beneficiaries() {
                                                     fontSize: 20,
                                                 }}>{s.icon}</div>
                                                 <div>
-                                                    <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 13, color: C.white }}>{s.name}</div>
+                                                    <div style={{ fontWeight: 700, fontSize: 13, color: C.textBright }}>{s.name}</div>
                                                     <div style={{ fontSize: 8, color: C.text, lineHeight: 1.4 }}>{s.desc}</div>
                                                 </div>
                                             </div>
@@ -162,7 +160,7 @@ export default function Beneficiaries() {
                                         borderBottom: `1px solid ${C.border}`,
                                     }}>
                                         <div style={{ fontSize: 36, marginBottom: 6 }}>{selectedScheme.icon}</div>
-                                        <div style={{ fontFamily: "'Rajdhani',sans-serif", fontWeight: 700, fontSize: 15, color: C.white }}>
+                                        <div style={{ fontWeight: 700, fontSize: 15, color: C.textBright }}>
                                             {selectedScheme.name}
                                         </div>
                                         <div style={{ fontSize: 9, color: selectedScheme.color, marginTop: 4 }}>
@@ -178,10 +176,10 @@ export default function Beneficiaries() {
                                         ].map(m => (
                                             <div key={m.l} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: `1px solid ${C.borderSoft}` }}>
                                                 <span style={{ fontSize: 9, color: C.text }}>{m.l}</span>
-                                                <span style={{ fontSize: 12, color: m.c, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700 }}>{m.v}</span>
+                                                <span style={{ fontSize: 12, color: m.c, fontWeight: 700 }}>{m.v}</span>
                                             </div>
                                         ))}
-                                        <div style={{ marginTop: 14, fontSize: 9, color: C.text, letterSpacing: '1.5px', marginBottom: 10 }}>
+                                        <div style={{ marginTop: 14, fontSize: 9, color: C.text, marginBottom: 10 }}>
                                             LINKAGE SUGGESTIONS
                                         </div>
                                         <div style={{ padding: 10, background: 'rgba(0,200,255,.04)', border: `1px solid ${C.border}`, borderRadius: 4 }}>
@@ -196,7 +194,7 @@ export default function Beneficiaries() {
                             ) : (
                                 <div style={{ padding: 30, textAlign: 'center' }}>
                                     <div style={{ fontSize: 40, opacity: .3, marginBottom: 12 }}>🏥</div>
-                                    <div style={{ fontSize: 10, color: C.text, letterSpacing: '1px', lineHeight: 1.8 }}>
+                                    <div style={{ fontSize: 10, color: C.text, lineHeight: 1.8 }}>
                                         SELECT A SCHEME<br />TO VIEW DETAILS AND<br />LINKAGE RECOMMENDATIONS
                                     </div>
                                 </div>
@@ -207,7 +205,7 @@ export default function Beneficiaries() {
 
                 {tab === 'booths' && (
                     <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
-                        <div style={{ fontSize: 9, color: C.text, letterSpacing: '2px', marginBottom: 16 }}>
+                        <div style={{ fontSize: 9, color: C.text, marginBottom: 16 }}>
                             BOOTH-WISE SCHEME COVERAGE MATRIX
                         </div>
                         {/* Horizontal scrollable table */}
@@ -224,14 +222,14 @@ export default function Beneficiaries() {
                                         const totalL = Object.values(row.data).reduce((s, d) => s + d.linked, 0);
                                         return (
                                             <tr key={row.booth}>
-                                                <td style={{ color: C.white, fontWeight: 'bold' }}>{row.booth}</td>
+                                                <td style={{ color: C.textBright, fontWeight: 'bold' }}>{row.booth}</td>
                                                 {SCHEMES.map(s => {
                                                     const d = row.data[s.id];
                                                     const pct = ((d.linked / d.eligible) * 100).toFixed(0);
                                                     return (
                                                         <td key={s.id} style={{ textAlign: 'center' }}>
                                                             <div style={{
-                                                                fontSize: 11, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700,
+                                                                fontSize: 11, fontWeight: 700,
                                                                 color: parseInt(pct) > 70 ? C.green : parseInt(pct) > 40 ? C.gold : C.red
                                                             }}>
                                                                 {pct}%
@@ -242,7 +240,7 @@ export default function Beneficiaries() {
                                                 })}
                                                 <td style={{ textAlign: 'center' }}>
                                                     <div style={{
-                                                        fontSize: 12, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700,
+                                                        fontSize: 12, fontWeight: 700,
                                                         color: ((totalL / totalE) * 100) > 60 ? C.green : C.gold
                                                     }}>
                                                         {((totalL / totalE) * 100).toFixed(0)}%
@@ -268,14 +266,12 @@ export default function Beneficiaries() {
                                 style={{
                                     flex: 1, padding: '8px 14px', background: C.surface, border: `1px solid ${C.border}`,
                                     color: C.textBright, fontSize: 10, borderRadius: 3,
-                                    fontFamily: "'Share Tech Mono',monospace",
-                                }}
+                                    }}
                             />
                             <select value={selectedBooth} onChange={e => setSelectedBooth(e.target.value)} style={{
                                 padding: '8px 14px', background: C.surface, border: `1px solid ${C.border}`,
                                 color: C.textBright, fontSize: 10, borderRadius: 3,
-                                fontFamily: "'Share Tech Mono',monospace",
-                            }}>
+                                }}>
                                 <option value="all">ALL BOOTHS</option>
                                 {BOOTHS.map(b => <option key={b} value={b}>{b}</option>)}
                             </select>
@@ -291,7 +287,7 @@ export default function Beneficiaries() {
                                             fontSize: 18,
                                         }}>👤</div>
                                         <div style={{ flex: 1 }}>
-                                            <div style={{ fontSize: 12, color: C.white, fontFamily: "'Rajdhani',sans-serif", fontWeight: 700 }}>{b.name}</div>
+                                            <div style={{ fontSize: 12, color: C.textBright, fontWeight: 700 }}>{b.name}</div>
                                             <div style={{ fontSize: 8, color: C.text }}>Aadhaar: {b.aadhaar} · {b.booth}</div>
                                             <div style={{ display: 'flex', gap: 4, marginTop: 6, flexWrap: 'wrap' }}>
                                                 {b.schemes.map(sid => {
