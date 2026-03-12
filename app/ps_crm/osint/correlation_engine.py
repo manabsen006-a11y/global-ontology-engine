@@ -432,10 +432,33 @@ class CorrelationEngine:
             negative_strength,
         )
 
-        # Build hypothesis
-        hypothesis = template["hypothesis_template"].format(entity=entity_name.title())
+        # Extract context variables for hypothesis enhancement
+        involved_countries = set()
+        involved_orgs = set()
+        involved_people = set()
+        for s in matched_signals:
+            involved_countries.update(s.entities.get("countries", []))
+            involved_orgs.update(s.entities.get("organizations", []))
+            involved_people.update(s.entities.get("people", []))
 
-        title = f"{template['name']}: {entity_name.title()}"
+        all_actors = (involved_orgs | involved_people) - {entity_name}
+        all_locations = involved_countries - {entity_name}
+        
+        actors_str = ", ".join(a.title() for a in sorted(all_actors)) if all_actors else "Unspecified Actors"
+        locations_str = ", ".join(l.title() for l in sorted(all_locations)) if all_locations else "Unspecified Regions"
+
+        # Build Title
+        title_template = template.get("title_template")
+        if title_template:
+            title = title_template.format(entity=entity_name.title(), actors=actors_str, locations=locations_str)
+        else:
+            title = f"{template['name']}: {entity_name.title()}"
+
+        # Build Hypothesis
+        base_hypothesis = template["hypothesis_template"].format(entity=entity_name.title(), actors=actors_str, locations=locations_str)
+        if "{actors}" not in template["hypothesis_template"]:
+            base_hypothesis += f" Other actors involved: {actors_str}."
+        hypothesis = base_hypothesis
 
         domains_spanned = sorted({ec["domain"] for ec in evidence_chain if ec["domain"]})
         all_entities = set()
@@ -488,6 +511,19 @@ class CorrelationEngine:
             trust_score = self._compute_open_correlation_trust(cluster)
 
             # Build hypothesis from the signals
+            involved_countries = set()
+            involved_orgs = set()
+            involved_people = set()
+            for s in cluster:
+                involved_countries.update(s.entities.get("countries", []))
+                involved_orgs.update(s.entities.get("organizations", []))
+                involved_people.update(s.entities.get("people", []))
+
+            all_actors = (involved_orgs | involved_people) - {entity_name}
+            all_locations = involved_countries - {entity_name}
+            actors_str = ", ".join(a.title() for a in sorted(all_actors)) if all_actors else "None specified"
+            locations_str = ", ".join(l.title() for l in sorted(all_locations)) if all_locations else "None specified"
+
             domain_summaries = []
             for domain in sorted(domains):
                 domain_signals = [s for s in cluster if s.domain == domain]
@@ -498,10 +534,12 @@ class CorrelationEngine:
                     )
 
             hypothesis = (
-                f"Cross-domain intelligence convergence detected around {entity_name.title()}. "
-                f"Signals from {len(domains)} domains ({', '.join(sorted(domains))}) "
-                f"show interconnected activity:\n" +
-                "\n".join(f"• {s}" for s in domain_summaries[:4])
+                f"Multiple intelligence signals are converging around {entity_name.title()}, indicating a complex situation spanning {len(domains)} domains ({', '.join(sorted(domains))}).\n"
+                f"Interconnected activities include:\n" +
+                "\n".join(f"• {s}" for s in domain_summaries[:4]) +
+                f"\n\nContext:"
+                f"\n• Potential Actors Involved: {actors_str}"
+                f"\n• External Regions Impacted: {locations_str}"
             )
 
             # Determine severity from events
@@ -518,7 +556,7 @@ class CorrelationEngine:
                 all_entities.update(s.all_entity_names())
 
             reports.append(IntelReport(
-                title=f"Cross-Domain Convergence: {entity_name.title()}",
+                title=f"Multi-Domain Activity Detected: {entity_name.title()}",
                 hypothesis=hypothesis,
                 evidence_chain=evidence_chain,
                 trust_score=trust_score,
