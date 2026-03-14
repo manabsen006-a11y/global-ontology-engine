@@ -14,6 +14,8 @@ _STATE_CACHE: Dict[str, Any] | None = None
 
 
 def _default_state_file() -> Path:
+    if os.environ.get("VERCEL") == "1":
+        return Path("/tmp") / "daily_quota_state.json"
     return Path(__file__).resolve().parent / "model_cache" / "daily_quota_state.json"
 
 
