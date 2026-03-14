@@ -797,8 +797,10 @@ class YouTubeConnector:
 # -----------------------------------------------------------------------------
 # Aggregator Orchestration with TTL Cache
 # -----------------------------------------------------------------------------
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
 def fetch_all_osint_data() -> List[RawIntelObject]:
-    """Hits configured OSINT APIs while utilizing TTL cache to preserve quota."""
+    """Hits configured OSINT APIs concurrently while utilizing TTL cache to preserve quota."""
     current_time = time.time()
 
     if _cache["data"] and (current_time - float(_cache["last_fetched"]) < int(_cache["ttl_seconds"])):
@@ -823,11 +825,15 @@ def fetch_all_osint_data() -> List[RawIntelObject]:
         YouTubeConnector(),         # YouTube intelligence-relevant videos
     ]
 
-    for connector in connectors:
-        try:
-            all_data.extend(connector.fetch_recent())
-        except Exception as exc:
-            logger.error("Failed to fetch data from %s: %s", connector.__class__.__name__, exc)
+    with ThreadPoolExecutor(max_workers=len(connectors)) as executor:
+        future_to_connector = {executor.submit(c.fetch_recent): c for c in connectors}
+        for future in as_completed(future_to_connector):
+            connector = future_to_connector[future]
+            try:
+                results = future.result()
+                all_data.extend(results)
+            except Exception as exc:
+                logger.error("Failed to fetch data from %s: %s", connector.__class__.__name__, exc)
 
     _cache["last_fetched"] = current_time
     all_data.sort(key=lambda item: item.timestamp, reverse=True)

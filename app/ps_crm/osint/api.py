@@ -16,6 +16,7 @@ from app.ps_crm.osint.correlation_engine import (
     generate_intel_reports,
     run_full_correlation_pipeline,
 )
+from starlette.concurrency import run_in_threadpool
 
 logger = logging.getLogger(__name__)
 
@@ -330,10 +331,10 @@ async def get_filtered_osint_briefing(min_relevance: int = 50):
     
     try:
         # Step 1: Hit all connectors
-        raw_firehose = fetch_all_osint_data()
+        raw_firehose = await run_in_threadpool(fetch_all_osint_data)
         
         # Step 2: Apply Cognitive Filter
-        actionable_intel = process_and_filter_intel(raw_firehose, threshold=min_relevance)
+        actionable_intel = await run_in_threadpool(process_and_filter_intel, raw_firehose, min_relevance)
         
         return {
             "status": "success",
@@ -422,7 +423,8 @@ async def _collect_articles_for_correlation() -> List[Dict[str, Any]]:
     
     # Try fetching Google News RSS directly to guarantee some structured news content
     try:
-        rss_results = GoogleNewsRSSConnector().fetch_recent()
+        connector = GoogleNewsRSSConnector()
+        rss_results = await run_in_threadpool(connector.fetch_recent)
         # Convert RawIntelObjects from RSS back to the article format our correlator expects
         for rss_item in rss_results:
             all_articles.append({
